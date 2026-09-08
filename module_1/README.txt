@@ -21,3 +21,9 @@ Setup & Run Instructions:
 
 5. Access in browser:
    http://localhost:8080 or http://0.0.0.0:8080
+
+Design and Implementation Approach:
+- Application Architecture: Implemented an application factory pattern in app/__init__.py to decouple configuration from runtime execution.
+- Routing: Configured modular URL endpoints using Flask Blueprints (app/routes.py) handling routes for Home (/), Projects (/projects), and Contact (/contact).
+- Templating: Structured Jinja2 HTML templates utilizing layout inheritance (base.html) with semantic block overrides across page views.
+- Static Assets: Integrated modern responsive CSS stylesheets and optimized static image assets located in app/static/.
