@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="home-layout">
+    <div class="bio-text">
+        <h1>Luke Ellman</h1>
+        <h3>Associate Partner Engagement Specialist | AI & Software Engineering</h3>
+        <p>Welcome to my developer portfolio. I focus on building scalable software applications, backend data pipelines, and exploring practical machine learning systems. This site serves as a central repository for projects completed during my software concepts coursework.</p>
+        <p>Currently expanding technical expertise in Python architectures, full-stack frameworks, and data engineering systems.</p>
+    </div>
+    <div class="bio-image">
+        <img src="{{ url_for('static', filename='images/profile.jpeg') }}" alt="Profile Photo">
+    </div>
+</section>
+{% endblock %}
