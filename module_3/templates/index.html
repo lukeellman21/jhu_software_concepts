@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GradCafé Analytics Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>GradCafé Admissions Analytics</h1>
+            <p class="subtitle">PostgreSQL + SQLAlchemy Flask Dashboard</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Flash notifications -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="alert">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Trigger Controls -->
+        <section class="control-panel">
+            <div class="action-card">
+                <div>
+                    <h3>Pull Scraped Data</h3>
+                    <p class="status-indicator">Status: {{ task_status['pull_data']['message'] }}</p>
+                </div>
+                <form action="{{ url_for('trigger_pull') }}" method="POST">
+                    <button type="submit" class="btn btn-primary" {% if task_status['pull_data']['running'] %}disabled{% endif %}>
+                        {% if task_status['pull_data']['running'] %}Pulling...{% else %}Pull Data{% endif %}
+                    </button>
+                </form>
+            </div>
+
+            <div class="action-card">
+                <div>
+                    <h3>Update Analysis</h3>
+                    <p class="status-indicator">Status: {{ task_status['update_analysis']['message'] }}</p>
+                </div>
+                <form action="{{ url_for('trigger_analysis') }}" method="POST">
+                    <button type="submit" class="btn btn-secondary" {% if task_status['update_analysis']['running'] %}disabled{% endif %}>
+                        {% if task_status['update_analysis']['running'] %}Calculating...{% else %}Update Analysis{% endif %}
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Metric Summary Cards -->
+        <section class="metrics-grid">
+            <div class="card metric-card">
+                <span class="label">Total Applicants</span>
+                <span class="value">{{ "{:,}".format(metrics.total_applicants) }}</span>
+            </div>
+            <div class="card metric-card">
+                <span class="label">Fall 2026 Cohort</span>
+                <span class="value">{{ "{:,}".format(metrics.fall_2026_count) }}</span>
+            </div>
+            <div class="card metric-card">
+                <span class="label">Acceptance Rate</span>
+                <span class="value">{{ metrics.acceptance_rate }}</span>
+            </div>
+            <div class="card metric-card">
+                <span class="label">Average GPA</span>
+                <span class="value">{{ metrics.avg_gpa }}</span>
+            </div>
+        </section>
+
+        <!-- Data Browser Table -->
+        <section class="card table-container">
+            <div class="table-header">
+                <h2>Applicant Records</h2>
+                <form method="GET" action="{{ url_for('index') }}" class="search-box">
+                    <input type="text" name="q" value="{{ search_query }}" placeholder="Search program, degree, term...">
+                    <button type="submit" class="btn btn-small">Search</button>
+                    {% if search_query %}
+                        <a href="{{ url_for('index') }}" class="btn btn-small btn-clear">Clear</a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Program / Institution</th>
+                        <th>Degree</th>
+                        <th>Term</th>
+                        <th>Status</th>
+                        <th>GPA</th>
+                        <th>GRE Q</th>
+                        <th>Origin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in records %}
+                    <tr>
+                        <td>#{{ r.p_id }}</td>
+                        <td>{{ r.program }}</td>
+                        <td><span class="badge badge-degree">{{ r.degree }}</span></td>
+                        <td>{{ r.term }}</td>
+                        <td><span class="badge badge-{{ r.status|lower }}">{{ r.status }}</span></td>
+                        <td>{{ "%.2f"|format(r.gpa) if r.gpa else "-" }}</td>
+                        <td>{{ "%.1f"|format(r.gre) if r.gre else "-" }}</td>
+                        <td>{{ r.us_or_international or "-" }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">No applicants found matching your query.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                {% if page > 1 %}
+                    <a href="{{ url_for('index', page=page-1, q=search_query) }}" class="btn btn-small">&laquo; Previous</a>
+                {% endif %}
+                <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+                {% if page < total_pages %}
+                    <a href="{{ url_for('index', page=page+1, q=search_query) }}" class="btn btn-small">Next &raquo;</a>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+</body>
+</html>
