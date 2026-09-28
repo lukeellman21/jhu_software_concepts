@@ -4,7 +4,7 @@ A test-driven, documented version of the Grad Café analytics service: a Flask
 analysis page backed by a PostgreSQL database, an ETL pipeline that fills it,
 203 marked tests at 100% coverage, and Sphinx documentation.
 
-- **Documentation:** https://jhu-software-concepts.readthedocs.io/
+- **Documentation:** https://lukeellman-jhu-software-concepts.readthedocs.io/en/latest/
 - **CI:** [`.github/workflows/tests.yml`](../.github/workflows/tests.yml): starts PostgreSQL 16 and runs the full suite with coverage (see `actions_success.png`)
 - **Coverage proof:** [`coverage_summary.txt`](coverage_summary.txt)
 
@@ -113,7 +113,7 @@ for the rendered answers.
 
 ## Documentation
 
-Published at <https://jhu-software-concepts.readthedocs.io/>. Build it locally:
+Published at <https://lukeellman-jhu-software-concepts.readthedocs.io/en/latest/>. Build it locally:
 
 ```bash
 cd module_4
