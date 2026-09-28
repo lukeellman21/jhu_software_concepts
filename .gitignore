@@ -5,3 +5,16 @@ module_2/llm_hosting/models/
 .DS_Store
 */.DS_Store
 *.zip
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+module_4/docs/_build/doctrees/
+.env
+.env.*
+*.env
+.coverage.*
+coverage.xml

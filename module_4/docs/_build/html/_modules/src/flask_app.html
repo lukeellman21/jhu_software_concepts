@@ -1,0 +1,439 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.flask_app &mdash; Grad Café Analytics</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=9f5556dd"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Grad Café Analytics
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview and setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../testing.html">Testing guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../operations.html">Operational notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Troubleshooting</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Grad Café Analytics</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.flask_app</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.flask_app</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Web layer: the Flask application factory and its routes.</span>
+
+<span class="sd">The factory takes the scraper, the loader, the analysis provider and the job</span>
+<span class="sd">runner as arguments, so the test suite can inject fakes and never touch the</span>
+<span class="sd">network.  Pipeline state is held in a single :class:`PullState` object that the</span>
+<span class="sd">tests can read and write directly -- busy-state behaviour is therefore</span>
+<span class="sd">observable and injectable rather than timing dependent.</span>
+
+<span class="sd">Routes</span>
+<span class="sd">------</span>
+<span class="sd">``GET /``</span>
+<span class="sd">    Redirect to ``/analysis``.</span>
+<span class="sd">``GET /analysis``</span>
+<span class="sd">    The analysis page: both buttons plus one ``Answer:`` per question.</span>
+<span class="sd">``POST /pull-data``</span>
+<span class="sd">    Scrape and load new rows.  ``200 {"ok": true}`` when it ran,</span>
+<span class="sd">    ``202`` when handed to a background runner, ``409 {"busy": true}`` when a</span>
+<span class="sd">    pull is already in progress, ``500 {"ok": false}`` when the loader failed.</span>
+<span class="sd">``POST /update-analysis``</span>
+<span class="sd">    Recompute the analysis.  ``200 {"ok": true}``, or ``409 {"busy": true}``</span>
+<span class="sd">    while a pull is in progress (in which case nothing is recomputed).</span>
+<span class="sd">``GET /status``</span>
+<span class="sd">    JSON snapshot of :class:`PullState`, used by the page and by tests.</span>
+<span class="sd">"""</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">secrets</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">current_app</span><span class="p">,</span> <span class="n">jsonify</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">url_for</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">db</span><span class="p">,</span> <span class="n">load_data</span><span class="p">,</span> <span class="n">query_data</span><span class="p">,</span> <span class="n">scrape</span>
+
+<span class="c1">#: Key under which the service bundle is stored in ``app.extensions``.</span>
+<span class="n">EXTENSION_KEY</span> <span class="o">=</span> <span class="s2">"gradcafe"</span>
+
+<span class="c1">#: ``data-testid`` values the UI tests rely on.</span>
+<span class="n">PULL_BUTTON_TESTID</span> <span class="o">=</span> <span class="s2">"pull-data-btn"</span>
+<span class="n">UPDATE_BUTTON_TESTID</span> <span class="o">=</span> <span class="s2">"update-analysis-btn"</span>
+
+<span class="n">bp</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s2">"gradcafe"</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_now</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the current UTC time as a second-precision ISO-8601 string."""</span>
+    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(</span><span class="n">timespec</span><span class="o">=</span><span class="s2">"seconds"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="PullState">
+<a class="viewcode-back" href="../../api.html#src.flask_app.PullState">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PullState</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Observable state of the data pipeline.</span>
+
+<span class="sd">    A single instance lives on the application; tests may flip</span>
+<span class="sd">    :attr:`busy` directly to simulate a pull that is in progress, which keeps</span>
+<span class="sd">    busy-state tests free of sleeps and threads.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">busy</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">"Idle"</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_pull</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_analysis_at</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rows_loaded</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="PullState.begin_pull">
+<a class="viewcode-back" href="../../api.html#src.flask_app.PullState.begin_pull">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">begin_pull</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Mark a pull as in progress."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">busy</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">"Pull in progress..."</span></div>
+
+
+<div class="viewcode-block" id="PullState.complete_pull">
+<a class="viewcode-back" href="../../api.html#src.flask_app.PullState.complete_pull">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">complete_pull</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rows_loaded</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Mark a pull as finished successfully."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">busy</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rows_loaded</span> <span class="o">=</span> <span class="n">rows_loaded</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_pull</span> <span class="o">=</span> <span class="n">_now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Loaded </span><span class="si">{</span><span class="n">rows_loaded</span><span class="si">}</span><span class="s2"> new row(s) at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">last_pull</span><span class="si">}</span><span class="s2">"</span></div>
+
+
+<div class="viewcode-block" id="PullState.fail_pull">
+<a class="viewcode-back" href="../../api.html#src.flask_app.PullState.fail_pull">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fail_pull</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="ne">BaseException</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Mark a pull as finished with an error."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">busy</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Pull failed: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">"</span></div>
+
+
+<div class="viewcode-block" id="PullState.record_analysis">
+<a class="viewcode-back" href="../../api.html#src.flask_app.PullState.record_analysis">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">record_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Store a freshly computed analysis snapshot."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysis</span> <span class="o">=</span> <span class="n">analysis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_analysis_at</span> <span class="o">=</span> <span class="n">_now</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="PullState.snapshot">
+<a class="viewcode-back" href="../../api.html#src.flask_app.PullState.snapshot">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Return a JSON-serialisable view of the state."""</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"busy"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">,</span>
+            <span class="s2">"message"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+            <span class="s2">"error"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
+            <span class="s2">"last_pull"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_pull</span><span class="p">,</span>
+            <span class="s2">"last_analysis_at"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_analysis_at</span><span class="p">,</span>
+            <span class="s2">"rows_loaded"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows_loaded</span><span class="p">,</span>
+            <span class="s2">"analysis_ready"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="run_sync">
+<a class="viewcode-back" href="../../api.html#src.flask_app.run_sync">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_sync</span><span class="p">(</span><span class="n">job</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="kc">None</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Default runner: execute ``job`` inline and return ``None``."""</span>
+    <span class="n">job</span><span class="p">()</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="run_in_thread">
+<a class="viewcode-back" href="../../api.html#src.flask_app.run_in_thread">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_in_thread</span><span class="p">(</span><span class="n">job</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="kc">None</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Alternative runner: execute ``job`` on a daemon thread.</span>
+
+<span class="sd">    Returning the thread tells the route to answer ``202 Accepted``; the caller</span>
+<span class="sd">    (or a test) can join the returned thread instead of sleeping.</span>
+<span class="sd">    """</span>
+    <span class="n">thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">thread</span></div>
+
+
+
+<div class="viewcode-block" id="get_services">
+<a class="viewcode-back" href="../../api.html#src.flask_app.get_services">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_services</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Return the injected service bundle for the active application."""</span>
+    <span class="k">return</span> <span class="n">current_app</span><span class="o">.</span><span class="n">extensions</span><span class="p">[</span><span class="n">EXTENSION_KEY</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="get_state">
+<a class="viewcode-back" href="../../api.html#src.flask_app.get_state">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_state</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">PullState</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the :class:`PullState` of the active application."""</span>
+    <span class="k">return</span> <span class="n">get_services</span><span class="p">()[</span><span class="s2">"state"</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="home">
+<a class="viewcode-back" href="../../api.html#src.flask_app.home">[docs]</a>
+<span class="nd">@bp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Redirect the site root to the analysis page."""</span>
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s2">"gradcafe.analysis_page"</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="analysis_page">
+<a class="viewcode-back" href="../../api.html#src.flask_app.analysis_page">[docs]</a>
+<span class="nd">@bp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/analysis"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">analysis_page</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Render the analysis page.</span>
+
+<span class="sd">    The page renders the cached analysis snapshot, computing one on first visit</span>
+<span class="sd">    so a fresh application is never blank.  ``POST /update-analysis`` refreshes</span>
+<span class="sd">    the snapshot.</span>
+<span class="sd">    """</span>
+    <span class="n">services</span> <span class="o">=</span> <span class="n">get_services</span><span class="p">()</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">services</span><span class="p">[</span><span class="s2">"state"</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">analysis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">record_analysis</span><span class="p">(</span><span class="n">services</span><span class="p">[</span><span class="s2">"analysis"</span><span class="p">]())</span>
+
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+        <span class="s2">"analysis.html"</span><span class="p">,</span>
+        <span class="n">items</span><span class="o">=</span><span class="n">query_data</span><span class="o">.</span><span class="n">get_analysis_items</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">analysis</span><span class="p">),</span>
+        <span class="n">analysis</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">analysis</span><span class="p">,</span>
+        <span class="n">rows</span><span class="o">=</span><span class="n">services</span><span class="p">[</span><span class="s2">"rows"</span><span class="p">](),</span>
+        <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(),</span>
+        <span class="n">pull_testid</span><span class="o">=</span><span class="n">PULL_BUTTON_TESTID</span><span class="p">,</span>
+        <span class="n">update_testid</span><span class="o">=</span><span class="n">UPDATE_BUTTON_TESTID</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="pull_data">
+<a class="viewcode-back" href="../../api.html#src.flask_app.pull_data">[docs]</a>
+<span class="nd">@bp</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"/pull-data"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pull_data</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Scrape new Grad Café rows and load them into PostgreSQL."""</span>
+    <span class="n">services</span> <span class="o">=</span> <span class="n">get_services</span><span class="p">()</span>
+    <span class="n">state</span><span class="p">:</span> <span class="n">PullState</span> <span class="o">=</span> <span class="n">services</span><span class="p">[</span><span class="s2">"state"</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">busy</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">"ok"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">"busy"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"message"</span><span class="p">:</span> <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">}),</span> <span class="mi">409</span>
+
+    <span class="n">state</span><span class="o">.</span><span class="n">begin_pull</span><span class="p">()</span>
+    <span class="n">outcome</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">job</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">records</span> <span class="o">=</span> <span class="n">services</span><span class="p">[</span><span class="s2">"scraper"</span><span class="p">]()</span>
+            <span class="n">outcome</span><span class="p">[</span><span class="s2">"rows_loaded"</span><span class="p">]</span> <span class="o">=</span> <span class="n">services</span><span class="p">[</span><span class="s2">"loader"</span><span class="p">](</span><span class="n">records</span><span class="p">)</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">complete_pull</span><span class="p">(</span><span class="n">outcome</span><span class="p">[</span><span class="s2">"rows_loaded"</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># surfaced to the caller as a 500</span>
+            <span class="n">outcome</span><span class="p">[</span><span class="s2">"error"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">fail_pull</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+
+    <span class="n">handle</span> <span class="o">=</span> <span class="n">services</span><span class="p">[</span><span class="s2">"runner"</span><span class="p">](</span><span class="n">job</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">handle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># A background runner owns the job now, so the response reports the</span>
+        <span class="c1"># hand-off rather than a state that is still being written to.</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">"ok"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"accepted"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Pull started."</span><span class="p">}),</span> <span class="mi">202</span>
+    <span class="k">if</span> <span class="s2">"error"</span> <span class="ow">in</span> <span class="n">outcome</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">"ok"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">"busy"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">"error"</span><span class="p">:</span> <span class="n">outcome</span><span class="p">[</span><span class="s2">"error"</span><span class="p">]}),</span> <span class="mi">500</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">jsonify</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"ok"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">"busy"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">"rows_loaded"</span><span class="p">:</span> <span class="n">outcome</span><span class="p">[</span><span class="s2">"rows_loaded"</span><span class="p">],</span>
+                <span class="s2">"message"</span><span class="p">:</span> <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">),</span>
+        <span class="mi">200</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="update_analysis">
+<a class="viewcode-back" href="../../api.html#src.flask_app.update_analysis">[docs]</a>
+<span class="nd">@bp</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"/update-analysis"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_analysis</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Recompute the analysis snapshot, unless a pull is in progress."""</span>
+    <span class="n">services</span> <span class="o">=</span> <span class="n">get_services</span><span class="p">()</span>
+    <span class="n">state</span><span class="p">:</span> <span class="n">PullState</span> <span class="o">=</span> <span class="n">services</span><span class="p">[</span><span class="s2">"state"</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">busy</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">"ok"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">"busy"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"message"</span><span class="p">:</span> <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">}),</span> <span class="mi">409</span>
+
+    <span class="n">state</span><span class="o">.</span><span class="n">record_analysis</span><span class="p">(</span><span class="n">services</span><span class="p">[</span><span class="s2">"analysis"</span><span class="p">]())</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">jsonify</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"ok"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">"busy"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">"updated_at"</span><span class="p">:</span> <span class="n">state</span><span class="o">.</span><span class="n">last_analysis_at</span><span class="p">,</span>
+                <span class="s2">"keys"</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">analysis</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">),</span>
+        <span class="mi">200</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="status">
+<a class="viewcode-back" href="../../api.html#src.flask_app.status">[docs]</a>
+<span class="nd">@bp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/status"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">status</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Return the pipeline state as JSON."""</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">get_state</span><span class="p">()</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()),</span> <span class="mi">200</span></div>
+
+
+
+<div class="viewcode-block" id="create_app">
+<a class="viewcode-back" href="../../api.html#src.flask_app.create_app">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_app</span><span class="p">(</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">scraper</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">loader</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]],</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">analysis_provider</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rows_provider</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">runner</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="kc">None</span><span class="p">]],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PullState</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Flask</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Build and return a configured Flask application.</span>
+
+<span class="sd">    :param config: values merged into ``app.config``; ``DATABASE_URL`` is</span>
+<span class="sd">        honoured by the default loader/analysis providers.</span>
+<span class="sd">    :param scraper: callable returning a list of raw records.  Defaults to</span>
+<span class="sd">        :func:`src.scrape.pull_new_records`.</span>
+<span class="sd">    :param loader: callable taking those records and returning the number of new</span>
+<span class="sd">        rows.  Defaults to :func:`src.load_data.insert_rows`.</span>
+<span class="sd">    :param analysis_provider: callable returning the analysis dict.  Defaults to</span>
+<span class="sd">        :func:`src.query_data.get_analysis`.</span>
+<span class="sd">    :param rows_provider: callable returning recent rows for the page table.</span>
+<span class="sd">        Defaults to :func:`src.query_data.get_recent_rows`.</span>
+<span class="sd">    :param runner: callable that executes the pull job.  Defaults to</span>
+<span class="sd">        :func:`run_sync`; pass :func:`run_in_thread` for background pulls.</span>
+<span class="sd">    :param state: pre-built :class:`PullState`, handy for seeding a busy state.</span>
+<span class="sd">    :returns: the application, with the service bundle in</span>
+<span class="sd">        ``app.extensions["gradcafe"]``.</span>
+<span class="sd">    """</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="c1"># Never hard-coded: supplied by the environment in deployment, random</span>
+        <span class="c1"># (and therefore per-process) otherwise.</span>
+        <span class="n">SECRET_KEY</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"FLASK_SECRET_KEY"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">secrets</span><span class="o">.</span><span class="n">token_hex</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span>
+        <span class="n">DATABASE_URL</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">get_database_url</span><span class="p">(),</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">config</span><span class="p">:</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="n">database_url</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">"DATABASE_URL"</span><span class="p">]</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">extensions</span><span class="p">[</span><span class="n">EXTENSION_KEY</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"state"</span><span class="p">:</span> <span class="n">state</span> <span class="ow">or</span> <span class="n">PullState</span><span class="p">(),</span>
+        <span class="s2">"scraper"</span><span class="p">:</span> <span class="n">scraper</span> <span class="ow">or</span> <span class="n">scrape</span><span class="o">.</span><span class="n">pull_new_records</span><span class="p">,</span>
+        <span class="s2">"loader"</span><span class="p">:</span> <span class="n">loader</span> <span class="ow">or</span> <span class="n">partial</span><span class="p">(</span><span class="n">load_data</span><span class="o">.</span><span class="n">insert_rows</span><span class="p">,</span> <span class="n">database_url</span><span class="o">=</span><span class="n">database_url</span><span class="p">),</span>
+        <span class="s2">"analysis"</span><span class="p">:</span> <span class="n">analysis_provider</span> <span class="ow">or</span> <span class="n">partial</span><span class="p">(</span><span class="n">query_data</span><span class="o">.</span><span class="n">get_analysis</span><span class="p">,</span> <span class="n">database_url</span><span class="o">=</span><span class="n">database_url</span><span class="p">),</span>
+        <span class="s2">"rows"</span><span class="p">:</span> <span class="n">rows_provider</span> <span class="ow">or</span> <span class="n">partial</span><span class="p">(</span><span class="n">query_data</span><span class="o">.</span><span class="n">get_recent_rows</span><span class="p">,</span> <span class="n">database_url</span><span class="o">=</span><span class="n">database_url</span><span class="p">),</span>
+        <span class="s2">"runner"</span><span class="p">:</span> <span class="n">runner</span> <span class="ow">or</span> <span class="n">run_sync</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">app</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>  <span class="c1"># pragma: no cover - development server entry point</span>
+    <span class="n">create_app</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Luke Ellman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

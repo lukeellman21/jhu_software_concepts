@@ -1,0 +1,71 @@
+name: tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pytest:
+    name: Pytest (module_4)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gradcafe_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # The suite runs against this throwaway database; it never touches a
+      # developer's own DATABASE_URL.
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/gradcafe_test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/gradcafe_test
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: module_4/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r module_4/requirements.txt
+
+      - name: Wait for PostgreSQL
+        run: |
+          for _ in $(seq 1 30); do
+            pg_isready -h localhost -p 5432 -U postgres && exit 0
+            sleep 1
+          done
+          echo "PostgreSQL did not become ready in time" >&2
+          exit 1
+
+      - name: Run the full marked suite with coverage
+        run: |
+          python -m pytest module_4 \
+            -m "web or buttons or analysis or db or integration" \
+            | tee coverage_run.txt
+
+      - name: Upload the coverage summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary
+          path: coverage_run.txt

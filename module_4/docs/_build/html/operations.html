@@ -1,0 +1,215 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Operational notes &mdash; Grad Café Analytics</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=9f5556dd"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Troubleshooting" href="troubleshooting.html" />
+    <link rel="prev" title="Testing guide" href="testing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Grad Café Analytics
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview and setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Operational notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#busy-state-policy">Busy-state policy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis-caching">Analysis caching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#idempotency-and-uniqueness">Idempotency and uniqueness</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#failure-handling">Failure handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#required-fields">Required fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#background-pulls">Background pulls</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Grad Café Analytics</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Operational notes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/operations.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="operational-notes">
+<h1>Operational notes<a class="headerlink" href="#operational-notes" title="Link to this heading"></a></h1>
+<section id="busy-state-policy">
+<h2>Busy-state policy<a class="headerlink" href="#busy-state-policy" title="Link to this heading"></a></h2>
+<p>One flag, <code class="xref py py-attr docutils literal notranslate"><span class="pre">src.flask_app.PullState.busy</span></code>, gates both POST endpoints:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Request</p></th>
+<th class="head"><p>Busy?</p></th>
+<th class="head"><p>Response</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/pull-data</span></code></p></td>
+<td><p>no</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">200</span> <span class="pre">{&quot;ok&quot;:</span> <span class="pre">true,</span> <span class="pre">&quot;rows_loaded&quot;:</span> <span class="pre">n}</span></code>, or <code class="docutils literal notranslate"><span class="pre">202</span></code> with a background
+runner</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/pull-data</span></code></p></td>
+<td><p>yes</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">409</span> <span class="pre">{&quot;ok&quot;:</span> <span class="pre">false,</span> <span class="pre">&quot;busy&quot;:</span> <span class="pre">true}</span></code>; nothing is scraped or written</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code></p></td>
+<td><p>no</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">200</span> <span class="pre">{&quot;ok&quot;:</span> <span class="pre">true,</span> <span class="pre">&quot;updated_at&quot;:</span> <span class="pre">...}</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code></p></td>
+<td><p>yes</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">409</span> <span class="pre">{&quot;ok&quot;:</span> <span class="pre">false,</span> <span class="pre">&quot;busy&quot;:</span> <span class="pre">true}</span></code>; the snapshot is left alone</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/pull-data</span></code> (loader raised)</p></td>
+<td><p>–</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">500</span> <span class="pre">{&quot;ok&quot;:</span> <span class="pre">false,</span> <span class="pre">&quot;error&quot;:</span> <span class="pre">...}</span></code>; the batch was rolled back</p></td>
+</tr>
+</tbody>
+</table>
+<p>The flag is set before the job starts and cleared in both the success and the
+failure path, so a failed pull cannot wedge the pipeline.  <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/status</span></code>
+exposes the same state as JSON, which is how the page and the tests observe it
+without polling the database.</p>
+</section>
+<section id="analysis-caching">
+<h2>Analysis caching<a class="headerlink" href="#analysis-caching" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/analysis</span></code> renders the cached snapshot on
+<a class="reference internal" href="api.html#src.flask_app.PullState" title="src.flask_app.PullState"><code class="xref py py-class docutils literal notranslate"><span class="pre">src.flask_app.PullState</span></code></a>, computing one on first visit.  A pull does
+<strong>not</strong> refresh it – that is what the <strong>Update Analysis</strong> button is for.  The
+page shows the timestamp of the last update so a stale snapshot is visible
+rather than silent.</p>
+</section>
+<section id="idempotency-and-uniqueness">
+<h2>Idempotency and uniqueness<a class="headerlink" href="#idempotency-and-uniqueness" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">p_id</span></code> is the primary key and is derived from the record rather than
+generated by the database (<a class="reference internal" href="api.html#src.load_data.derive_p_id" title="src.load_data.derive_p_id"><code class="xref py py-func docutils literal notranslate"><span class="pre">src.load_data.derive_p_id()</span></code></a>):</p>
+<ol class="arabic simple">
+<li><p>an explicit <code class="docutils literal notranslate"><span class="pre">p_id</span></code> or <code class="docutils literal notranslate"><span class="pre">id</span></code> on the record, if it is an integer;</p></li>
+<li><p>otherwise the numeric id in the Grad Café result URL
+(<code class="docutils literal notranslate"><span class="pre">.../result/1020482</span></code> → <code class="docutils literal notranslate"><span class="pre">1020482</span></code>);</p></li>
+<li><p>otherwise a SHA-256 fingerprint of <code class="docutils literal notranslate"><span class="pre">program</span></code>, <code class="docutils literal notranslate"><span class="pre">comments</span></code>,
+<code class="docutils literal notranslate"><span class="pre">date_added</span></code> and <code class="docutils literal notranslate"><span class="pre">status</span></code>, reduced to a 31-bit integer.</p></li>
+</ol>
+<p>Inserts use <code class="docutils literal notranslate"><span class="pre">ON</span> <span class="pre">CONFLICT</span> <span class="pre">(p_id)</span> <span class="pre">DO</span> <span class="pre">NOTHING</span></code>, so:</p>
+<ul class="simple">
+<li><p>pulling the same page twice inserts nothing the second time;</p></li>
+<li><p>overlapping pulls insert only the records the database has not seen;</p></li>
+<li><p><a class="reference internal" href="api.html#src.load_data.insert_rows" title="src.load_data.insert_rows"><code class="xref py py-func docutils literal notranslate"><span class="pre">src.load_data.insert_rows()</span></code></a> returns the number of genuinely new rows,
+which is what the endpoint reports as <code class="docutils literal notranslate"><span class="pre">rows_loaded</span></code>.</p></li>
+</ul>
+</section>
+<section id="failure-handling">
+<h2>Failure handling<a class="headerlink" href="#failure-handling" title="Link to this heading"></a></h2>
+<p>The whole batch is one transaction.  Any <code class="docutils literal notranslate"><span class="pre">psycopg.Error</span></code> rolls it back and
+re-raises, so a bad row in the middle of a pull cannot leave a partial write
+behind.  The endpoint turns that into a <code class="docutils literal notranslate"><span class="pre">500</span></code> and records the message on the
+state, where the page renders it as an error banner.</p>
+</section>
+<section id="required-fields">
+<h2>Required fields<a class="headerlink" href="#required-fields" title="Link to this heading"></a></h2>
+<p><a class="reference internal" href="api.html#src.load_data.REQUIRED_FIELDS" title="src.load_data.REQUIRED_FIELDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">src.load_data.REQUIRED_FIELDS</span></code></a> lists the columns that may never be
+<code class="docutils literal notranslate"><span class="pre">NULL</span></code>.  <a class="reference internal" href="api.html#src.load_data.normalize_record" title="src.load_data.normalize_record"><code class="xref py py-func docutils literal notranslate"><span class="pre">src.load_data.normalize_record()</span></code></a> fills each of them with a
+documented fallback (<code class="docutils literal notranslate"><span class="pre">&quot;Unknown&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Applied&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Other&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>), and
+the table declares them <code class="docutils literal notranslate"><span class="pre">NOT</span> <span class="pre">NULL</span></code> so the guarantee is enforced where it
+matters.</p>
+</section>
+<section id="background-pulls">
+<h2>Background pulls<a class="headerlink" href="#background-pulls" title="Link to this heading"></a></h2>
+<p>The default runner is synchronous: the response arrives after the load
+finishes.  Passing <code class="docutils literal notranslate"><span class="pre">runner=run_in_thread</span></code> to
+<a class="reference internal" href="api.html#src.flask_app.create_app" title="src.flask_app.create_app"><code class="xref py py-func docutils literal notranslate"><span class="pre">src.flask_app.create_app()</span></code></a> moves the job to a daemon thread; the endpoint
+then answers <code class="docutils literal notranslate"><span class="pre">202</span></code> and the caller watches <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/status</span></code> for completion.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="testing.html" class="btn btn-neutral float-left" title="Testing guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="troubleshooting.html" class="btn btn-neutral float-right" title="Troubleshooting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Luke Ellman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

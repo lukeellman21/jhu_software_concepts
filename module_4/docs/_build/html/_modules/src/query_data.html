@@ -1,0 +1,463 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.query_data &mdash; Grad Café Analytics</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=9f5556dd"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Grad Café Analytics
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview and setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../testing.html">Testing guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../operations.html">Operational notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Troubleshooting</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Grad Café Analytics</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.query_data</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.query_data</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Reporting layer: the SQL behind the analysis page.</span>
+
+<span class="sd">Each question rendered on ``/analysis`` is declared once as an</span>
+<span class="sd">:class:`AnalysisSpec` -- key, human question, formatting kind and SQL.  That</span>
+<span class="sd">single declaration drives the raw values (:func:`get_analysis`), the formatted</span>
+<span class="sd">answers (:func:`get_analysis_items`) and the command-line report</span>
+<span class="sd">(:func:`run_queries`), so the page and the CLI can never drift apart.</span>
+<span class="sd">"""</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">NamedTuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">psycopg</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">db</span>
+
+
+<div class="viewcode-block" id="AnalysisSpec">
+<a class="viewcode-back" href="../../api.html#src.query_data.AnalysisSpec">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AnalysisSpec</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""One question on the analysis page.</span>
+
+<span class="sd">    :param key: key used in the analysis dictionary and the template.</span>
+<span class="sd">    :param question: question text rendered next to the ``Answer:`` label.</span>
+<span class="sd">    :param kind: ``"count"``, ``"percent"`` or ``"float"``; selects the</span>
+<span class="sd">        formatter used by :func:`format_answer`.</span>
+<span class="sd">    :param sql: SQL returning exactly one scalar value.</span>
+<span class="sd">    """</span>
+
+    <span class="n">key</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">question</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">sql</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+
+<span class="n">_ACCEPTED</span> <span class="o">=</span> <span class="s2">"(status ILIKE '</span><span class="si">%a</span><span class="s2">ccepted%' OR status ILIKE '</span><span class="si">%a</span><span class="s2">cceptance%')"</span>
+
+<span class="n">ANALYSIS_SPECS</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">AnalysisSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"total_applicants"</span><span class="p">,</span>
+        <span class="s2">"How many applicant entries are stored in the database?"</span><span class="p">,</span>
+        <span class="s2">"count"</span><span class="p">,</span>
+        <span class="s2">"SELECT COUNT(*) FROM applicants;"</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"fall_2026_count"</span><span class="p">,</span>
+        <span class="s2">"How many entries applied for Fall 2026?"</span><span class="p">,</span>
+        <span class="s2">"count"</span><span class="p">,</span>
+        <span class="s2">"SELECT COUNT(*) FROM applicants WHERE term ILIKE '</span><span class="si">%F</span><span class="s2">all 2026%';"</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"percent_international"</span><span class="p">,</span>
+        <span class="s2">"What percentage of entries are from international students?"</span><span class="p">,</span>
+        <span class="s2">"percent"</span><span class="p">,</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        SELECT COUNT(*) FILTER (WHERE us_or_international ILIKE 'international') * 100.0</span>
+<span class="sd">               / NULLIF(COUNT(*) FILTER (</span>
+<span class="sd">                     WHERE us_or_international IS NOT NULL</span>
+<span class="sd">                       AND TRIM(us_or_international) &lt;&gt; ''</span>
+<span class="sd">                       AND us_or_international &lt;&gt; 'Unknown'), 0)</span>
+<span class="sd">        FROM applicants;</span>
+<span class="sd">        """</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"overall_acceptance_percent"</span><span class="p">,</span>
+        <span class="s2">"What percentage of all entries report an acceptance?"</span><span class="p">,</span>
+        <span class="s2">"percent"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"SELECT COUNT(*) FILTER (WHERE </span><span class="si">{</span><span class="n">_ACCEPTED</span><span class="si">}</span><span class="s2">) * 100.0 / NULLIF(COUNT(*), 0) FROM applicants;"</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"avg_gpa"</span><span class="p">,</span>
+        <span class="s2">"What is the average GPA across all entries that reported one?"</span><span class="p">,</span>
+        <span class="s2">"float"</span><span class="p">,</span>
+        <span class="s2">"SELECT AVG(gpa) FROM applicants WHERE gpa IS NOT NULL;"</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"avg_gre"</span><span class="p">,</span>
+        <span class="s2">"What is the average GRE Quantitative score?"</span><span class="p">,</span>
+        <span class="s2">"float"</span><span class="p">,</span>
+        <span class="s2">"SELECT AVG(gre) FROM applicants WHERE gre IS NOT NULL;"</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"avg_gre_v"</span><span class="p">,</span>
+        <span class="s2">"What is the average GRE Verbal score?"</span><span class="p">,</span>
+        <span class="s2">"float"</span><span class="p">,</span>
+        <span class="s2">"SELECT AVG(gre_v) FROM applicants WHERE gre_v IS NOT NULL;"</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"avg_gre_aw"</span><span class="p">,</span>
+        <span class="s2">"What is the average GRE Analytical Writing score?"</span><span class="p">,</span>
+        <span class="s2">"float"</span><span class="p">,</span>
+        <span class="s2">"SELECT AVG(gre_aw) FROM applicants WHERE gre_aw IS NOT NULL;"</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"avg_gpa_american_fall_2026"</span><span class="p">,</span>
+        <span class="s2">"What is the average GPA of American students applying for Fall 2026?"</span><span class="p">,</span>
+        <span class="s2">"float"</span><span class="p">,</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        SELECT AVG(gpa) FROM applicants</span>
+<span class="sd">        WHERE term ILIKE '%Fall 2026%'</span>
+<span class="sd">          AND us_or_international ILIKE 'american'</span>
+<span class="sd">          AND gpa IS NOT NULL;</span>
+<span class="sd">        """</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"fall_2025_acceptance_percent"</span><span class="p">,</span>
+        <span class="s2">"What percentage of Fall 2025 entries are acceptances?"</span><span class="p">,</span>
+        <span class="s2">"percent"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"""</span>
+<span class="s2">        SELECT COUNT(*) FILTER (WHERE </span><span class="si">{</span><span class="n">_ACCEPTED</span><span class="si">}</span><span class="s2">) * 100.0 / NULLIF(COUNT(*), 0)</span>
+<span class="s2">        FROM applicants WHERE term ILIKE '%Fall 2025%';</span>
+<span class="s2">        """</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"avg_gpa_accepted_fall_2026"</span><span class="p">,</span>
+        <span class="s2">"What is the average GPA of Fall 2026 acceptances?"</span><span class="p">,</span>
+        <span class="s2">"float"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"""</span>
+<span class="s2">        SELECT AVG(gpa) FROM applicants</span>
+<span class="s2">        WHERE term ILIKE '%Fall 2026%' AND </span><span class="si">{</span><span class="n">_ACCEPTED</span><span class="si">}</span><span class="s2"> AND gpa IS NOT NULL;</span>
+<span class="s2">        """</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"jhu_masters_cs_count"</span><span class="p">,</span>
+        <span class="s2">"How many entries are JHU Masters applications in Computer Science?"</span><span class="p">,</span>
+        <span class="s2">"count"</span><span class="p">,</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        SELECT COUNT(*) FROM applicants</span>
+<span class="sd">        WHERE (program ILIKE '%Johns Hopkins%' OR program ILIKE '%JHU%')</span>
+<span class="sd">          AND program ILIKE '%Computer Science%'</span>
+<span class="sd">          AND (degree ILIKE '%master%' OR degree ILIKE '%MS%' OR degree ILIKE '%M.S.%');</span>
+<span class="sd">        """</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"fall_2026_phd_cs_acceptances"</span><span class="p">,</span>
+        <span class="s2">"How many 2026 PhD Computer Science acceptances are there (original fields)?"</span><span class="p">,</span>
+        <span class="s2">"count"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"""</span>
+<span class="s2">        SELECT COUNT(*) FROM applicants</span>
+<span class="s2">        WHERE term ILIKE '%2026%' AND </span><span class="si">{</span><span class="n">_ACCEPTED</span><span class="si">}</span>
+<span class="s2">          AND (degree ILIKE '%phd%' OR degree ILIKE '%ph.d%')</span>
+<span class="s2">          AND program ILIKE '%Computer Science%';</span>
+<span class="s2">        """</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"llm_fall_2026_phd_cs_acceptances"</span><span class="p">,</span>
+        <span class="s2">"How many 2026 PhD Computer Science acceptances are there (LLM-standardised fields)?"</span><span class="p">,</span>
+        <span class="s2">"count"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"""</span>
+<span class="s2">        SELECT COUNT(*) FROM applicants</span>
+<span class="s2">        WHERE term ILIKE '%2026%' AND </span><span class="si">{</span><span class="n">_ACCEPTED</span><span class="si">}</span>
+<span class="s2">          AND (degree ILIKE '%phd%' OR degree ILIKE '%ph.d%')</span>
+<span class="s2">          AND llm_generated_program ILIKE '%Computer Science%';</span>
+<span class="s2">        """</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"avg_gpa_phd"</span><span class="p">,</span>
+        <span class="s2">"What is the average GPA of PhD applicants?"</span><span class="p">,</span>
+        <span class="s2">"float"</span><span class="p">,</span>
+        <span class="s2">"SELECT AVG(gpa) FROM applicants WHERE degree ILIKE '%phd%' AND gpa IS NOT NULL;"</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"avg_gpa_masters"</span><span class="p">,</span>
+        <span class="s2">"What is the average GPA of Masters applicants?"</span><span class="p">,</span>
+        <span class="s2">"float"</span><span class="p">,</span>
+        <span class="s2">"SELECT AVG(gpa) FROM applicants WHERE degree ILIKE '%master%' AND gpa IS NOT NULL;"</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"acceptance_percent_high_gpa"</span><span class="p">,</span>
+        <span class="s2">"What percentage of applicants with a GPA of 3.80 or higher were accepted?"</span><span class="p">,</span>
+        <span class="s2">"percent"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"""</span>
+<span class="s2">        SELECT COUNT(*) FILTER (WHERE </span><span class="si">{</span><span class="n">_ACCEPTED</span><span class="si">}</span><span class="s2">) * 100.0 / NULLIF(COUNT(*), 0)</span>
+<span class="s2">        FROM applicants WHERE gpa &gt;= 3.8;</span>
+<span class="s2">        """</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">AnalysisSpec</span><span class="p">(</span>
+        <span class="s2">"acceptance_percent_low_gpa"</span><span class="p">,</span>
+        <span class="s2">"What percentage of applicants with a GPA below 3.80 were accepted?"</span><span class="p">,</span>
+        <span class="s2">"percent"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"""</span>
+<span class="s2">        SELECT COUNT(*) FILTER (WHERE </span><span class="si">{</span><span class="n">_ACCEPTED</span><span class="si">}</span><span class="s2">) * 100.0 / NULLIF(COUNT(*), 0)</span>
+<span class="s2">        FROM applicants WHERE gpa &lt; 3.8;</span>
+<span class="s2">        """</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1">#: Keys the analysis template expects :func:`get_analysis` to provide.</span>
+<span class="n">EXPECTED_KEYS</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">key</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">ANALYSIS_SPECS</span><span class="p">)</span>
+
+<span class="c1">#: Columns of ``applicants`` that :func:`get_recent_rows` returns.</span>
+<span class="n">ROW_KEYS</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"p_id"</span><span class="p">,</span>
+    <span class="s2">"program"</span><span class="p">,</span>
+    <span class="s2">"comments"</span><span class="p">,</span>
+    <span class="s2">"date_added"</span><span class="p">,</span>
+    <span class="s2">"url"</span><span class="p">,</span>
+    <span class="s2">"status"</span><span class="p">,</span>
+    <span class="s2">"term"</span><span class="p">,</span>
+    <span class="s2">"us_or_international"</span><span class="p">,</span>
+    <span class="s2">"gpa"</span><span class="p">,</span>
+    <span class="s2">"gre"</span><span class="p">,</span>
+    <span class="s2">"gre_v"</span><span class="p">,</span>
+    <span class="s2">"gre_aw"</span><span class="p">,</span>
+    <span class="s2">"degree"</span><span class="p">,</span>
+    <span class="s2">"llm_generated_program"</span><span class="p">,</span>
+    <span class="s2">"llm_generated_university"</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="format_percent">
+<a class="viewcode-back" href="../../api.html#src.query_data.format_percent">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">format_percent</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Format a percentage with exactly two decimal places, e.g. ``"39.28%"``."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%"</span></div>
+
+
+
+<div class="viewcode-block" id="format_float">
+<a class="viewcode-back" href="../../api.html#src.query_data.format_float">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">format_float</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Format an average with two decimals, or ``"N/A"`` when there is no data."""</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"N/A"</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span></div>
+
+
+
+<div class="viewcode-block" id="format_count">
+<a class="viewcode-back" href="../../api.html#src.query_data.format_count">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">format_count</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Format a row count with thousands separators."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span></div>
+
+
+
+<div class="viewcode-block" id="format_answer">
+<a class="viewcode-back" href="../../api.html#src.query_data.format_answer">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">format_answer</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Format ``value`` according to an :class:`AnalysisSpec` ``kind``."""</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"percent"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">format_percent</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"count"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">format_count</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">format_float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_analysis">
+<a class="viewcode-back" href="../../api.html#src.query_data.get_analysis">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_analysis</span><span class="p">(</span>
+    <span class="n">conn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">psycopg</span><span class="o">.</span><span class="n">Connection</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">database_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Run every :data:`ANALYSIS_SPECS` query and return the raw values.</span>
+
+<span class="sd">    :param conn: connection to reuse; when ``None`` one is opened from</span>
+<span class="sd">        ``DATABASE_URL`` and closed before returning.</span>
+<span class="sd">    :param database_url: connection-string override.</span>
+<span class="sd">    :returns: dict keyed by :data:`EXPECTED_KEYS`; counts are ints, averages and</span>
+<span class="sd">        percentages are floats or ``None`` when the query matched no rows.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">conn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">database_url</span><span class="p">)</span> <span class="k">as</span> <span class="n">owned</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">get_analysis</span><span class="p">(</span><span class="n">conn</span><span class="o">=</span><span class="n">owned</span><span class="p">)</span>
+
+    <span class="n">analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">with</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span> <span class="k">as</span> <span class="n">cur</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">ANALYSIS_SPECS</span><span class="p">:</span>
+            <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">sql</span><span class="p">)</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">row</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">analysis</span><span class="p">[</span><span class="n">spec</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"count"</span> <span class="k">else</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">analysis</span></div>
+
+
+
+<div class="viewcode-block" id="get_analysis_items">
+<a class="viewcode-back" href="../../api.html#src.query_data.get_analysis_items">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_analysis_items</span><span class="p">(</span><span class="n">analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Pair each question with its formatted answer, ready for the template.</span>
+
+<span class="sd">    :param analysis: output of :func:`get_analysis`.</span>
+<span class="sd">    :returns: list of ``{"key", "question", "answer"}`` dicts in page order.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">"key"</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">key</span><span class="p">,</span>
+            <span class="s2">"question"</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">question</span><span class="p">,</span>
+            <span class="s2">"answer"</span><span class="p">:</span> <span class="n">format_answer</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">key</span><span class="p">)),</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">ANALYSIS_SPECS</span>
+    <span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="get_recent_rows">
+<a class="viewcode-back" href="../../api.html#src.query_data.get_recent_rows">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_recent_rows</span><span class="p">(</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">conn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">psycopg</span><span class="o">.</span><span class="n">Connection</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">database_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Return the most recently loaded rows as dicts keyed by :data:`ROW_KEYS`.</span>
+
+<span class="sd">    :param limit: maximum number of rows to return.</span>
+<span class="sd">    :param conn: connection to reuse; opened from ``DATABASE_URL`` when ``None``.</span>
+<span class="sd">    :param database_url: connection-string override.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">conn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">database_url</span><span class="p">)</span> <span class="k">as</span> <span class="n">owned</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">get_recent_rows</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">conn</span><span class="o">=</span><span class="n">owned</span><span class="p">)</span>
+
+    <span class="n">columns</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ROW_KEYS</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span> <span class="k">as</span> <span class="n">cur</span><span class="p">:</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"SELECT </span><span class="si">{</span><span class="n">columns</span><span class="si">}</span><span class="s2"> FROM applicants ORDER BY p_id DESC LIMIT %s;"</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">limit</span><span class="p">,),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">ROW_KEYS</span><span class="p">,</span> <span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span></div>
+
+
+
+<div class="viewcode-block" id="count_rows">
+<a class="viewcode-back" href="../../api.html#src.query_data.count_rows">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">count_rows</span><span class="p">(</span>
+    <span class="n">conn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">psycopg</span><span class="o">.</span><span class="n">Connection</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">database_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the number of rows in ``applicants``."""</span>
+    <span class="k">if</span> <span class="n">conn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">database_url</span><span class="p">)</span> <span class="k">as</span> <span class="n">owned</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">count_rows</span><span class="p">(</span><span class="n">conn</span><span class="o">=</span><span class="n">owned</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span> <span class="k">as</span> <span class="n">cur</span><span class="p">:</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"SELECT COUNT(*) FROM applicants;"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="run_queries">
+<a class="viewcode-back" href="../../api.html#src.query_data.run_queries">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_queries</span><span class="p">(</span><span class="n">database_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Print every question and answer to stdout and return the raw analysis.</span>
+
+<span class="sd">    This is the command-line equivalent of the ``/analysis`` page:</span>
+<span class="sd">    ``python -m src.query_data``.</span>
+<span class="sd">    """</span>
+    <span class="n">analysis</span> <span class="o">=</span> <span class="n">get_analysis</span><span class="p">(</span><span class="n">database_url</span><span class="o">=</span><span class="n">database_url</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">get_analysis_items</span><span class="p">(</span><span class="n">analysis</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'question'</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">Answer: </span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'answer'</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">analysis</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>  <span class="c1"># pragma: no cover - CLI entry point</span>
+    <span class="n">run_queries</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Luke Ellman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

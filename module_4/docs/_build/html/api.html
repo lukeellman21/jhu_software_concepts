@@ -1,0 +1,1536 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API reference &mdash; Grad Café Analytics</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=9f5556dd"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Testing guide" href="testing.html" />
+    <link rel="prev" title="Architecture" href="architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Grad Café Analytics
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview and setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.flask_app">Web layer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#routes">Routes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.flask_app.EXTENSION_KEY"><code class="docutils literal notranslate"><span class="pre">EXTENSION_KEY</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.flask_app.PULL_BUTTON_TESTID"><code class="docutils literal notranslate"><span class="pre">PULL_BUTTON_TESTID</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.flask_app.PullState"><code class="docutils literal notranslate"><span class="pre">PullState</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.flask_app.PullState.error"><code class="docutils literal notranslate"><span class="pre">PullState.error</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.flask_app.PullState.last_pull"><code class="docutils literal notranslate"><span class="pre">PullState.last_pull</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.flask_app.PullState.last_analysis_at"><code class="docutils literal notranslate"><span class="pre">PullState.last_analysis_at</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.flask_app.PullState.analysis"><code class="docutils literal notranslate"><span class="pre">PullState.analysis</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.flask_app.PullState.begin_pull"><code class="docutils literal notranslate"><span class="pre">PullState.begin_pull()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.flask_app.PullState.complete_pull"><code class="docutils literal notranslate"><span class="pre">PullState.complete_pull()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.flask_app.PullState.fail_pull"><code class="docutils literal notranslate"><span class="pre">PullState.fail_pull()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.flask_app.PullState.record_analysis"><code class="docutils literal notranslate"><span class="pre">PullState.record_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.flask_app.PullState.snapshot"><code class="docutils literal notranslate"><span class="pre">PullState.snapshot()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#src.flask_app.run_sync"><code class="docutils literal notranslate"><span class="pre">run_sync()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.flask_app.run_in_thread"><code class="docutils literal notranslate"><span class="pre">run_in_thread()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.flask_app.get_services"><code class="docutils literal notranslate"><span class="pre">get_services()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.flask_app.get_state"><code class="docutils literal notranslate"><span class="pre">get_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.flask_app.home"><code class="docutils literal notranslate"><span class="pre">home()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.flask_app.analysis_page"><code class="docutils literal notranslate"><span class="pre">analysis_page()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.flask_app.pull_data"><code class="docutils literal notranslate"><span class="pre">pull_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.flask_app.update_analysis"><code class="docutils literal notranslate"><span class="pre">update_analysis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.flask_app.status"><code class="docutils literal notranslate"><span class="pre">status()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.flask_app.create_app"><code class="docutils literal notranslate"><span class="pre">create_app()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.scrape">ETL: extract</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.scrape.PageSourceProvider"><code class="docutils literal notranslate"><span class="pre">PageSourceProvider</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.scrape.RAW_KEYS"><code class="docutils literal notranslate"><span class="pre">RAW_KEYS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.scrape.GradCafeScraper"><code class="docutils literal notranslate"><span class="pre">GradCafeScraper</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.scrape.GradCafeScraper.BASE_URL"><code class="docutils literal notranslate"><span class="pre">GradCafeScraper.BASE_URL</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.scrape.GradCafeScraper.data"><code class="docutils literal notranslate"><span class="pre">GradCafeScraper.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.scrape.GradCafeScraper.fetch_page_source"><code class="docutils literal notranslate"><span class="pre">GradCafeScraper.fetch_page_source()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.scrape.GradCafeScraper.close"><code class="docutils literal notranslate"><span class="pre">GradCafeScraper.close()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.scrape.GradCafeScraper.parse_page"><code class="docutils literal notranslate"><span class="pre">GradCafeScraper.parse_page()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.scrape.GradCafeScraper.scrape_data"><code class="docutils literal notranslate"><span class="pre">GradCafeScraper.scrape_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.scrape.GradCafeScraper.save_data"><code class="docutils literal notranslate"><span class="pre">GradCafeScraper.save_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.scrape.GradCafeScraper.load_existing"><code class="docutils literal notranslate"><span class="pre">GradCafeScraper.load_existing()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#src.scrape.pull_new_records"><code class="docutils literal notranslate"><span class="pre">pull_new_records()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.scrape.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.clean">ETL: transform</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.clean.CLEAN_KEYS"><code class="docutils literal notranslate"><span class="pre">CLEAN_KEYS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.clean.clean_text"><code class="docutils literal notranslate"><span class="pre">clean_text()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.clean.clean_gpa"><code class="docutils literal notranslate"><span class="pre">clean_gpa()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.clean.clean_gre"><code class="docutils literal notranslate"><span class="pre">clean_gre()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.clean.clean_gre_aw"><code class="docutils literal notranslate"><span class="pre">clean_gre_aw()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.clean.clean_record"><code class="docutils literal notranslate"><span class="pre">clean_record()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.clean.clean_records"><code class="docutils literal notranslate"><span class="pre">clean_records()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.clean.clean_file"><code class="docutils literal notranslate"><span class="pre">clean_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.clean.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.load_data">ETL: load</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#uniqueness-policy">Uniqueness policy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.REQUIRED_FIELDS"><code class="docutils literal notranslate"><span class="pre">REQUIRED_FIELDS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.COLUMNS"><code class="docutils literal notranslate"><span class="pre">COLUMNS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.DEFAULT_DATA_FILE"><code class="docutils literal notranslate"><span class="pre">DEFAULT_DATA_FILE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.extract_degree"><code class="docutils literal notranslate"><span class="pre">extract_degree()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.extract_university_and_program"><code class="docutils literal notranslate"><span class="pre">extract_university_and_program()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.normalize_status"><code class="docutils literal notranslate"><span class="pre">normalize_status()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.parse_float"><code class="docutils literal notranslate"><span class="pre">parse_float()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.parse_date"><code class="docutils literal notranslate"><span class="pre">parse_date()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.derive_p_id"><code class="docutils literal notranslate"><span class="pre">derive_p_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.normalize_record"><code class="docutils literal notranslate"><span class="pre">normalize_record()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.normalize_records"><code class="docutils literal notranslate"><span class="pre">normalize_records()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.ensure_schema"><code class="docutils literal notranslate"><span class="pre">ensure_schema()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.reset_schema"><code class="docutils literal notranslate"><span class="pre">reset_schema()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.insert_rows"><code class="docutils literal notranslate"><span class="pre">insert_rows()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.read_records"><code class="docutils literal notranslate"><span class="pre">read_records()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.load_data"><code class="docutils literal notranslate"><span class="pre">load_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.query_data">Reporting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.query_data.AnalysisSpec"><code class="docutils literal notranslate"><span class="pre">AnalysisSpec</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.query_data.AnalysisSpec.key"><code class="docutils literal notranslate"><span class="pre">AnalysisSpec.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.query_data.AnalysisSpec.question"><code class="docutils literal notranslate"><span class="pre">AnalysisSpec.question</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.query_data.AnalysisSpec.kind"><code class="docutils literal notranslate"><span class="pre">AnalysisSpec.kind</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.query_data.AnalysisSpec.sql"><code class="docutils literal notranslate"><span class="pre">AnalysisSpec.sql</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#src.query_data.EXPECTED_KEYS"><code class="docutils literal notranslate"><span class="pre">EXPECTED_KEYS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.query_data.ROW_KEYS"><code class="docutils literal notranslate"><span class="pre">ROW_KEYS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.query_data.format_percent"><code class="docutils literal notranslate"><span class="pre">format_percent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.query_data.format_float"><code class="docutils literal notranslate"><span class="pre">format_float()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.query_data.format_count"><code class="docutils literal notranslate"><span class="pre">format_count()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.query_data.format_answer"><code class="docutils literal notranslate"><span class="pre">format_answer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.query_data.get_analysis"><code class="docutils literal notranslate"><span class="pre">get_analysis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.query_data.get_analysis_items"><code class="docutils literal notranslate"><span class="pre">get_analysis_items()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.query_data.get_recent_rows"><code class="docutils literal notranslate"><span class="pre">get_recent_rows()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.query_data.count_rows"><code class="docutils literal notranslate"><span class="pre">count_rows()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.query_data.run_queries"><code class="docutils literal notranslate"><span class="pre">run_queries()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.models">ORM model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.models.Applicant"><code class="docutils literal notranslate"><span class="pre">Applicant</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.p_id"><code class="docutils literal notranslate"><span class="pre">Applicant.p_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.program"><code class="docutils literal notranslate"><span class="pre">Applicant.program</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.comments"><code class="docutils literal notranslate"><span class="pre">Applicant.comments</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.date_added"><code class="docutils literal notranslate"><span class="pre">Applicant.date_added</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.url"><code class="docutils literal notranslate"><span class="pre">Applicant.url</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.status"><code class="docutils literal notranslate"><span class="pre">Applicant.status</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.term"><code class="docutils literal notranslate"><span class="pre">Applicant.term</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.us_or_international"><code class="docutils literal notranslate"><span class="pre">Applicant.us_or_international</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.gpa"><code class="docutils literal notranslate"><span class="pre">Applicant.gpa</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.gre"><code class="docutils literal notranslate"><span class="pre">Applicant.gre</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.gre_v"><code class="docutils literal notranslate"><span class="pre">Applicant.gre_v</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.gre_aw"><code class="docutils literal notranslate"><span class="pre">Applicant.gre_aw</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.degree"><code class="docutils literal notranslate"><span class="pre">Applicant.degree</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.llm_generated_program"><code class="docutils literal notranslate"><span class="pre">Applicant.llm_generated_program</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.llm_generated_university"><code class="docutils literal notranslate"><span class="pre">Applicant.llm_generated_university</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.models.Applicant.to_dict"><code class="docutils literal notranslate"><span class="pre">Applicant.to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#src.models.get_engine"><code class="docutils literal notranslate"><span class="pre">get_engine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.models.get_session_factory"><code class="docutils literal notranslate"><span class="pre">get_session_factory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.models.get_db_session"><code class="docutils literal notranslate"><span class="pre">get_db_session()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.orm_queries">ORM report</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.orm_queries.run_orm_queries"><code class="docutils literal notranslate"><span class="pre">run_orm_queries()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-src.db">Connections</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#src.db.DEFAULT_DATABASE_URL"><code class="docutils literal notranslate"><span class="pre">DEFAULT_DATABASE_URL</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.db.get_database_url"><code class="docutils literal notranslate"><span class="pre">get_database_url()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.db.sqlalchemy_url"><code class="docutils literal notranslate"><span class="pre">sqlalchemy_url()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.db.connect"><code class="docutils literal notranslate"><span class="pre">connect()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="operations.html">Operational notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Grad Café Analytics</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<section id="module-src.flask_app">
+<span id="web-layer"></span><h2>Web layer<a class="headerlink" href="#module-src.flask_app" title="Link to this heading"></a></h2>
+<p>Web layer: the Flask application factory and its routes.</p>
+<p>The factory takes the scraper, the loader, the analysis provider and the job
+runner as arguments, so the test suite can inject fakes and never touch the
+network.  Pipeline state is held in a single <a class="reference internal" href="#src.flask_app.PullState" title="src.flask_app.PullState"><code class="xref py py-class docutils literal notranslate"><span class="pre">PullState</span></code></a> object that the
+tests can read and write directly – busy-state behaviour is therefore
+observable and injectable rather than timing dependent.</p>
+<section id="routes">
+<h3>Routes<a class="headerlink" href="#routes" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/</span></code></dt><dd><p>Redirect to <code class="docutils literal notranslate"><span class="pre">/analysis</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/analysis</span></code></dt><dd><p>The analysis page: both buttons plus one <code class="docutils literal notranslate"><span class="pre">Answer:</span></code> per question.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/pull-data</span></code></dt><dd><p>Scrape and load new rows.  <code class="docutils literal notranslate"><span class="pre">200</span> <span class="pre">{&quot;ok&quot;:</span> <span class="pre">true}</span></code> when it ran,
+<code class="docutils literal notranslate"><span class="pre">202</span></code> when handed to a background runner, <code class="docutils literal notranslate"><span class="pre">409</span> <span class="pre">{&quot;busy&quot;:</span> <span class="pre">true}</span></code> when a
+pull is already in progress, <code class="docutils literal notranslate"><span class="pre">500</span> <span class="pre">{&quot;ok&quot;:</span> <span class="pre">false}</span></code> when the loader failed.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code></dt><dd><p>Recompute the analysis.  <code class="docutils literal notranslate"><span class="pre">200</span> <span class="pre">{&quot;ok&quot;:</span> <span class="pre">true}</span></code>, or <code class="docutils literal notranslate"><span class="pre">409</span> <span class="pre">{&quot;busy&quot;:</span> <span class="pre">true}</span></code>
+while a pull is in progress (in which case nothing is recomputed).</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/status</span></code></dt><dd><p>JSON snapshot of <a class="reference internal" href="#src.flask_app.PullState" title="src.flask_app.PullState"><code class="xref py py-class docutils literal notranslate"><span class="pre">PullState</span></code></a>, used by the page and by tests.</p>
+</dd>
+</dl>
+</section>
+<dl class="py data">
+<dt class="sig sig-object py" id="src.flask_app.EXTENSION_KEY">
+<span class="sig-prename descclassname"><span class="pre">src.flask_app.</span></span><span class="sig-name descname"><span class="pre">EXTENSION_KEY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'gradcafe'</span></span><a class="headerlink" href="#src.flask_app.EXTENSION_KEY" title="Link to this definition"></a></dt>
+<dd><p>Key under which the service bundle is stored in <code class="docutils literal notranslate"><span class="pre">app.extensions</span></code>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="src.flask_app.PULL_BUTTON_TESTID">
+<span class="sig-prename descclassname"><span class="pre">src.flask_app.</span></span><span class="sig-name descname"><span class="pre">PULL_BUTTON_TESTID</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pull-data-btn'</span></span><a class="headerlink" href="#src.flask_app.PULL_BUTTON_TESTID" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">data-testid</span></code> values the UI tests rely on.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.flask_app.PullState">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">src.flask_app.</span></span><span class="sig-name descname"><span class="pre">PullState</span></span><a class="reference internal" href="_modules/src/flask_app.html#PullState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.PullState" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Observable state of the data pipeline.</p>
+<p>A single instance lives on the application; tests may flip
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">busy</span></code> directly to simulate a pull that is in progress, which keeps
+busy-state tests free of sleeps and threads.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.flask_app.PullState.error">
+<span class="sig-name descname"><span class="pre">error</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#src.flask_app.PullState.error" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.flask_app.PullState.last_pull">
+<span class="sig-name descname"><span class="pre">last_pull</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#src.flask_app.PullState.last_pull" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.flask_app.PullState.last_analysis_at">
+<span class="sig-name descname"><span class="pre">last_analysis_at</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#src.flask_app.PullState.last_analysis_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.flask_app.PullState.analysis">
+<span class="sig-name descname"><span class="pre">analysis</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#src.flask_app.PullState.analysis" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.flask_app.PullState.begin_pull">
+<span class="sig-name descname"><span class="pre">begin_pull</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/flask_app.html#PullState.begin_pull"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.PullState.begin_pull" title="Link to this definition"></a></dt>
+<dd><p>Mark a pull as in progress.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.flask_app.PullState.complete_pull">
+<span class="sig-name descname"><span class="pre">complete_pull</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rows_loaded</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/flask_app.html#PullState.complete_pull"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.PullState.complete_pull" title="Link to this definition"></a></dt>
+<dd><p>Mark a pull as finished successfully.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rows_loaded</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.flask_app.PullState.fail_pull">
+<span class="sig-name descname"><span class="pre">fail_pull</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/flask_app.html#PullState.fail_pull"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.PullState.fail_pull" title="Link to this definition"></a></dt>
+<dd><p>Mark a pull as finished with an error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>error</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#BaseException" title="(in Python v3.14)"><em>BaseException</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.flask_app.PullState.record_analysis">
+<span class="sig-name descname"><span class="pre">record_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/flask_app.html#PullState.record_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.PullState.record_analysis" title="Link to this definition"></a></dt>
+<dd><p>Store a freshly computed analysis snapshot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>analysis</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.flask_app.PullState.snapshot">
+<span class="sig-name descname"><span class="pre">snapshot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/flask_app.html#PullState.snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.PullState.snapshot" title="Link to this definition"></a></dt>
+<dd><p>Return a JSON-serialisable view of the state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.flask_app.run_sync">
+<span class="sig-prename descclassname"><span class="pre">src.flask_app.</span></span><span class="sig-name descname"><span class="pre">run_sync</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/flask_app.html#run_sync"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.run_sync" title="Link to this definition"></a></dt>
+<dd><p>Default runner: execute <code class="docutils literal notranslate"><span class="pre">job</span></code> inline and return <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>job</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><em>]</em><em>, </em><em>None</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.flask_app.run_in_thread">
+<span class="sig-prename descclassname"><span class="pre">src.flask_app.</span></span><span class="sig-name descname"><span class="pre">run_in_thread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/flask_app.html#run_in_thread"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.run_in_thread" title="Link to this definition"></a></dt>
+<dd><p>Alternative runner: execute <code class="docutils literal notranslate"><span class="pre">job</span></code> on a daemon thread.</p>
+<p>Returning the thread tells the route to answer <code class="docutils literal notranslate"><span class="pre">202</span> <span class="pre">Accepted</span></code>; the caller
+(or a test) can join the returned thread instead of sleeping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>job</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><em>]</em><em>, </em><em>None</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/threading.html#threading.Thread" title="(in Python v3.14)"><em>Thread</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.flask_app.get_services">
+<span class="sig-prename descclassname"><span class="pre">src.flask_app.</span></span><span class="sig-name descname"><span class="pre">get_services</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/flask_app.html#get_services"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.get_services" title="Link to this definition"></a></dt>
+<dd><p>Return the injected service bundle for the active application.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.flask_app.get_state">
+<span class="sig-prename descclassname"><span class="pre">src.flask_app.</span></span><span class="sig-name descname"><span class="pre">get_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/flask_app.html#get_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.get_state" title="Link to this definition"></a></dt>
+<dd><p>Return the <a class="reference internal" href="#src.flask_app.PullState" title="src.flask_app.PullState"><code class="xref py py-class docutils literal notranslate"><span class="pre">PullState</span></code></a> of the active application.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#src.flask_app.PullState" title="src.flask_app.PullState"><em>PullState</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.flask_app.home">
+<span class="sig-prename descclassname"><span class="pre">src.flask_app.</span></span><span class="sig-name descname"><span class="pre">home</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/flask_app.html#home"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.home" title="Link to this definition"></a></dt>
+<dd><p>Redirect the site root to the analysis page.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.flask_app.analysis_page">
+<span class="sig-prename descclassname"><span class="pre">src.flask_app.</span></span><span class="sig-name descname"><span class="pre">analysis_page</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/flask_app.html#analysis_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.analysis_page" title="Link to this definition"></a></dt>
+<dd><p>Render the analysis page.</p>
+<p>The page renders the cached analysis snapshot, computing one on first visit
+so a fresh application is never blank.  <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code> refreshes
+the snapshot.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.flask_app.pull_data">
+<span class="sig-prename descclassname"><span class="pre">src.flask_app.</span></span><span class="sig-name descname"><span class="pre">pull_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/flask_app.html#pull_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.pull_data" title="Link to this definition"></a></dt>
+<dd><p>Scrape new Grad Café rows and load them into PostgreSQL.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.flask_app.update_analysis">
+<span class="sig-prename descclassname"><span class="pre">src.flask_app.</span></span><span class="sig-name descname"><span class="pre">update_analysis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/flask_app.html#update_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.update_analysis" title="Link to this definition"></a></dt>
+<dd><p>Recompute the analysis snapshot, unless a pull is in progress.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.flask_app.status">
+<span class="sig-prename descclassname"><span class="pre">src.flask_app.</span></span><span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/flask_app.html#status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.status" title="Link to this definition"></a></dt>
+<dd><p>Return the pipeline state as JSON.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.flask_app.create_app">
+<span class="sig-prename descclassname"><span class="pre">src.flask_app.</span></span><span class="sig-name descname"><span class="pre">create_app</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scraper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_provider</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rows_provider</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/flask_app.html#create_app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.flask_app.create_app" title="Link to this definition"></a></dt>
+<dd><p>Build and return a configured Flask application.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>] </em><em>| </em><em>None</em>) – values merged into <code class="docutils literal notranslate"><span class="pre">app.config</span></code>; <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> is
+honoured by the default loader/analysis providers.</p></li>
+<li><p><strong>scraper</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em><em>]</em><em>] </em><em>| </em><em>None</em>) – callable returning a list of raw records.  Defaults to
+<a class="reference internal" href="#src.scrape.pull_new_records" title="src.scrape.pull_new_records"><code class="xref py py-func docutils literal notranslate"><span class="pre">src.scrape.pull_new_records()</span></code></a>.</p></li>
+<li><p><strong>loader</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em><em>]</em><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>] </em><em>| </em><em>None</em>) – callable taking those records and returning the number of new
+rows.  Defaults to <a class="reference internal" href="#src.load_data.insert_rows" title="src.load_data.insert_rows"><code class="xref py py-func docutils literal notranslate"><span class="pre">src.load_data.insert_rows()</span></code></a>.</p></li>
+<li><p><strong>analysis_provider</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em><em>] </em><em>| </em><em>None</em>) – callable returning the analysis dict.  Defaults to
+<a class="reference internal" href="#src.query_data.get_analysis" title="src.query_data.get_analysis"><code class="xref py py-func docutils literal notranslate"><span class="pre">src.query_data.get_analysis()</span></code></a>.</p></li>
+<li><p><strong>rows_provider</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em><em>]</em><em>] </em><em>| </em><em>None</em>) – callable returning recent rows for the page table.
+Defaults to <a class="reference internal" href="#src.query_data.get_recent_rows" title="src.query_data.get_recent_rows"><code class="xref py py-func docutils literal notranslate"><span class="pre">src.query_data.get_recent_rows()</span></code></a>.</p></li>
+<li><p><strong>runner</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><em>]</em><em>, </em><em>None</em><em>]</em><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>] </em><em>| </em><em>None</em>) – callable that executes the pull job.  Defaults to
+<a class="reference internal" href="#src.flask_app.run_sync" title="src.flask_app.run_sync"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_sync()</span></code></a>; pass <a class="reference internal" href="#src.flask_app.run_in_thread" title="src.flask_app.run_in_thread"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_in_thread()</span></code></a> for background pulls.</p></li>
+<li><p><strong>state</strong> (<a class="reference internal" href="#src.flask_app.PullState" title="src.flask_app.PullState"><em>PullState</em></a><em> | </em><em>None</em>) – pre-built <a class="reference internal" href="#src.flask_app.PullState" title="src.flask_app.PullState"><code class="xref py py-class docutils literal notranslate"><span class="pre">PullState</span></code></a>, handy for seeding a busy state.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the application, with the service bundle in
+<code class="docutils literal notranslate"><span class="pre">app.extensions[&quot;gradcafe&quot;]</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://flask.palletsprojects.com/en/stable/api/#flask.Flask" title="(in Flask v3.1.x)"><em>Flask</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.scrape">
+<span id="etl-extract"></span><h2>ETL: extract<a class="headerlink" href="#module-src.scrape" title="Link to this heading"></a></h2>
+<p>ETL extract layer: pull applicant entries from The Grad Café.</p>
+<p>The scraper separates <em>fetching</em> a page from <em>parsing</em> it.  Fetching goes
+through an injectable <code class="docutils literal notranslate"><span class="pre">page_source_provider</span></code> callable, which defaults to a
+Selenium-driven Chrome session; the test suite passes a provider that returns
+canned HTML, so no test ever touches the network.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="src.scrape.PageSourceProvider">
+<span class="sig-prename descclassname"><span class="pre">src.scrape.</span></span><span class="sig-name descname"><span class="pre">PageSourceProvider</span></span><a class="headerlink" href="#src.scrape.PageSourceProvider" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">provider(url)</span> <span class="pre">-&gt;</span> <span class="pre">html</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Signature of a page-source provider</p>
+</dd>
+</dl>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code>[[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="src.scrape.RAW_KEYS">
+<span class="sig-prename descclassname"><span class="pre">src.scrape.</span></span><span class="sig-name descname"><span class="pre">RAW_KEYS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('program',</span> <span class="pre">'comments',</span> <span class="pre">'date_added',</span> <span class="pre">'url',</span> <span class="pre">'status',</span> <span class="pre">'term',</span> <span class="pre">'US/International',</span> <span class="pre">'GPA',</span> <span class="pre">'GRE',</span> <span class="pre">'GRE</span> <span class="pre">V',</span> <span class="pre">'GRE</span> <span class="pre">AW',</span> <span class="pre">'Degree')</span></span><a class="headerlink" href="#src.scrape.RAW_KEYS" title="Link to this definition"></a></dt>
+<dd><p>Keys produced by <code class="xref py py-meth docutils literal notranslate"><span class="pre">GradCafeScraper._parse_row()</span></code>, i.e. the raw record shape.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.scrape.GradCafeScraper">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">src.scrape.</span></span><span class="sig-name descname"><span class="pre">GradCafeScraper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page_source_provider</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pause_seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">records_per_page</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">250</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/scrape.html#GradCafeScraper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.scrape.GradCafeScraper" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Fetch and parse Grad Café survey pages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_filepath</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>) – optional JSON file used to persist and resume a run.</p></li>
+<li><p><strong>page_source_provider</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#src.scrape.PageSourceProvider" title="src.scrape.PageSourceProvider"><em>PageSourceProvider</em></a><em>]</em>) – callable returning the HTML for a URL.  When
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, a Selenium Chrome session is created lazily.</p></li>
+<li><p><strong>pause_seconds</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – delay between page fetches when scraping live.</p></li>
+<li><p><strong>wait_seconds</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – how long to wait for the results table to appear.</p></li>
+<li><p><strong>records_per_page</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – value of the Grad Café <code class="docutils literal notranslate"><span class="pre">pp</span></code> query parameter.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.scrape.GradCafeScraper.BASE_URL">
+<span class="sig-name descname"><span class="pre">BASE_URL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.thegradcafe.com/survey/index.php'</span></span><a class="headerlink" href="#src.scrape.GradCafeScraper.BASE_URL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.scrape.GradCafeScraper.data">
+<span class="sig-name descname"><span class="pre">data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#src.scrape.GradCafeScraper.data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.scrape.GradCafeScraper.fetch_page_source">
+<span class="sig-name descname"><span class="pre">fetch_page_source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/scrape.html#GradCafeScraper.fetch_page_source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.scrape.GradCafeScraper.fetch_page_source" title="Link to this definition"></a></dt>
+<dd><p>Return the HTML of survey <code class="docutils literal notranslate"><span class="pre">page</span></code> using the configured provider.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>page</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.scrape.GradCafeScraper.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/scrape.html#GradCafeScraper.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.scrape.GradCafeScraper.close" title="Link to this definition"></a></dt>
+<dd><p>Quit the Chrome driver if one was created.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.scrape.GradCafeScraper.parse_page">
+<span class="sig-name descname"><span class="pre">parse_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">html</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/scrape.html#GradCafeScraper.parse_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.scrape.GradCafeScraper.parse_page" title="Link to this definition"></a></dt>
+<dd><p>Parse every data row of a survey page’s HTML into raw records.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>html</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.scrape.GradCafeScraper.scrape_data">
+<span class="sig-name descname"><span class="pre">scrape_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_records</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_pages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_page</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/scrape.html#GradCafeScraper.scrape_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.scrape.GradCafeScraper.scrape_data" title="Link to this definition"></a></dt>
+<dd><p>Fetch pages until <code class="docutils literal notranslate"><span class="pre">target_records</span></code> or <code class="docutils literal notranslate"><span class="pre">max_pages</span></code> is reached.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_records</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – stop once this many records are held in total.</p></li>
+<li><p><strong>max_pages</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – hard cap on the number of pages fetched.</p></li>
+<li><p><strong>start_page</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – first page to fetch.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>every record collected so far, including any resumed from disk.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.scrape.GradCafeScraper.save_data">
+<span class="sig-name descname"><span class="pre">save_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/scrape.html#GradCafeScraper.save_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.scrape.GradCafeScraper.save_data" title="Link to this definition"></a></dt>
+<dd><p>Write the collected records to <code class="xref py py-attr docutils literal notranslate"><span class="pre">output_filepath</span></code>, if one is set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.scrape.GradCafeScraper.load_existing">
+<span class="sig-name descname"><span class="pre">load_existing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/scrape.html#GradCafeScraper.load_existing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.scrape.GradCafeScraper.load_existing" title="Link to this definition"></a></dt>
+<dd><p>Load previously saved records so an interrupted run can resume.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.scrape.pull_new_records">
+<span class="sig-prename descclassname"><span class="pre">src.scrape.</span></span><span class="sig-name descname"><span class="pre">pull_new_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_records</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">250</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_pages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page_source_provider</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/scrape.html#pull_new_records"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.scrape.pull_new_records" title="Link to this definition"></a></dt>
+<dd><p>Scrape a batch of records; the default <code class="docutils literal notranslate"><span class="pre">scraper</span></code> used by the web layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_records</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – how many records to aim for.</p></li>
+<li><p><strong>max_pages</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – hard cap on pages fetched.</p></li>
+<li><p><strong>page_source_provider</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>] </em><em>| </em><em>None</em>) – injected fetcher; <code class="docutils literal notranslate"><span class="pre">None</span></code> uses Selenium.</p></li>
+<li><p><strong>output_filepath</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – optional JSON file to persist the batch to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the raw records.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.scrape.main">
+<span class="sig-prename descclassname"><span class="pre">src.scrape.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/scrape.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.scrape.main" title="Link to this definition"></a></dt>
+<dd><p>Command-line entry point: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">src.scrape</span> <span class="pre">--pages</span> <span class="pre">2</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>] </em><em>| </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.clean">
+<span id="etl-transform"></span><h2>ETL: transform<a class="headerlink" href="#module-src.clean" title="Link to this heading"></a></h2>
+<p>ETL transform layer: sanitise raw scraped records.</p>
+<p><a class="reference internal" href="#src.clean.clean_records" title="src.clean.clean_records"><code class="xref py py-func docutils literal notranslate"><span class="pre">clean_records()</span></code></a> is deliberately conservative – it normalises whitespace
+and coerces the numeric fields, but leaves the record keys exactly as the
+scraper produced them so that <a class="reference internal" href="#src.load_data.normalize_record" title="src.load_data.normalize_record"><code class="xref py py-func docutils literal notranslate"><span class="pre">src.load_data.normalize_record()</span></code></a> remains the
+single place where database columns are decided.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="src.clean.CLEAN_KEYS">
+<span class="sig-prename descclassname"><span class="pre">src.clean.</span></span><span class="sig-name descname"><span class="pre">CLEAN_KEYS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('program',</span> <span class="pre">'comments',</span> <span class="pre">'date_added',</span> <span class="pre">'url',</span> <span class="pre">'status',</span> <span class="pre">'term',</span> <span class="pre">'US/International',</span> <span class="pre">'GPA',</span> <span class="pre">'GRE',</span> <span class="pre">'GRE</span> <span class="pre">V',</span> <span class="pre">'GRE</span> <span class="pre">AW',</span> <span class="pre">'Degree')</span></span><a class="headerlink" href="#src.clean.CLEAN_KEYS" title="Link to this definition"></a></dt>
+<dd><p>Fields carried through <a class="reference internal" href="#src.clean.clean_record" title="src.clean.clean_record"><code class="xref py py-func docutils literal notranslate"><span class="pre">clean_record()</span></code></a>, in output order.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.clean.clean_text">
+<span class="sig-prename descclassname"><span class="pre">src.clean.</span></span><span class="sig-name descname"><span class="pre">clean_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/clean.html#clean_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.clean.clean_text" title="Link to this definition"></a></dt>
+<dd><p>Collapse runs of whitespace and strip the result, or return <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.clean.clean_gpa">
+<span class="sig-prename descclassname"><span class="pre">src.clean.</span></span><span class="sig-name descname"><span class="pre">clean_gpa</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_gpa</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/clean.html#clean_gpa"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.clean.clean_gpa" title="Link to this definition"></a></dt>
+<dd><p>Extract a plausible GPA (0.0-5.0) from messy input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>raw_gpa</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.clean.clean_gre">
+<span class="sig-prename descclassname"><span class="pre">src.clean.</span></span><span class="sig-name descname"><span class="pre">clean_gre</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_gre</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/clean.html#clean_gre"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.clean.clean_gre" title="Link to this definition"></a></dt>
+<dd><p>Extract a GRE score, accepting both the 130-170 and 200-800 scales.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>raw_gre</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.clean.clean_gre_aw">
+<span class="sig-prename descclassname"><span class="pre">src.clean.</span></span><span class="sig-name descname"><span class="pre">clean_gre_aw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_aw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/clean.html#clean_gre_aw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.clean.clean_gre_aw" title="Link to this definition"></a></dt>
+<dd><p>Extract the GRE Analytical Writing score (0.0-6.0).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>raw_aw</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.clean.clean_record">
+<span class="sig-prename descclassname"><span class="pre">src.clean.</span></span><span class="sig-name descname"><span class="pre">clean_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/clean.html#clean_record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.clean.clean_record" title="Link to this definition"></a></dt>
+<dd><p>Clean a single raw record, returning a dict keyed by <a class="reference internal" href="#src.clean.CLEAN_KEYS" title="src.clean.CLEAN_KEYS"><code class="xref py py-data docutils literal notranslate"><span class="pre">CLEAN_KEYS</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>entry</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.clean.clean_records">
+<span class="sig-prename descclassname"><span class="pre">src.clean.</span></span><span class="sig-name descname"><span class="pre">clean_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/clean.html#clean_records"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.clean.clean_records" title="Link to this definition"></a></dt>
+<dd><p>Clean a batch of raw records with <a class="reference internal" href="#src.clean.clean_record" title="src.clean.clean_record"><code class="xref py py-func docutils literal notranslate"><span class="pre">clean_record()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>records</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.14)"><em>Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.clean.clean_file">
+<span class="sig-prename descclassname"><span class="pre">src.clean.</span></span><span class="sig-name descname"><span class="pre">clean_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/clean.html#clean_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.clean.clean_file" title="Link to this definition"></a></dt>
+<dd><p>Clean a JSON dataset on disk and write the result.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_path</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – JSON array of raw records.</p></li>
+<li><p><strong>output_path</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – destination for the cleaned array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>number of records written.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#FileNotFoundError" title="(in Python v3.14)"><strong>FileNotFoundError</strong></a> – when <code class="docutils literal notranslate"><span class="pre">input_path</span></code> does not exist.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.clean.main">
+<span class="sig-prename descclassname"><span class="pre">src.clean.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/clean.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.clean.main" title="Link to this definition"></a></dt>
+<dd><p>Command-line entry point: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">src.clean</span> <span class="pre">--in</span> <span class="pre">raw.json</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>] </em><em>| </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.load_data">
+<span id="etl-load"></span><h2>ETL: load<a class="headerlink" href="#module-src.load_data" title="Link to this heading"></a></h2>
+<p>ETL load layer: normalise Grad Café records and write them to PostgreSQL.</p>
+<p>The module owns three responsibilities:</p>
+<ol class="arabic simple">
+<li><p>the <code class="docutils literal notranslate"><span class="pre">applicants</span></code> table definition (<code class="xref py py-data docutils literal notranslate"><span class="pre">CREATE_TABLE_SQL</span></code>),</p></li>
+<li><p>turning a raw scraped/cleaned record into a database row
+(<a class="reference internal" href="#src.load_data.normalize_record" title="src.load_data.normalize_record"><code class="xref py py-func docutils literal notranslate"><span class="pre">normalize_record()</span></code></a>),</p></li>
+<li><p>an idempotent bulk insert (<a class="reference internal" href="#src.load_data.insert_rows" title="src.load_data.insert_rows"><code class="xref py py-func docutils literal notranslate"><span class="pre">insert_rows()</span></code></a>).</p></li>
+</ol>
+<section id="uniqueness-policy">
+<h3>Uniqueness policy<a class="headerlink" href="#uniqueness-policy" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">p_id</span></code> is the primary key and is <em>derived</em> from the record rather than
+assigned by the database: the numeric id inside the Grad Café result URL when
+one is present, otherwise a deterministic hash of the record’s identifying
+fields (see <a class="reference internal" href="#src.load_data.derive_p_id" title="src.load_data.derive_p_id"><code class="xref py py-func docutils literal notranslate"><span class="pre">derive_p_id()</span></code></a>).  Inserts use <code class="docutils literal notranslate"><span class="pre">ON</span> <span class="pre">CONFLICT</span> <span class="pre">(p_id)</span> <span class="pre">DO</span>
+<span class="pre">NOTHING</span></code>, so re-pulling data that is already stored is a no-op.</p>
+</section>
+<dl class="py data">
+<dt class="sig sig-object py" id="src.load_data.REQUIRED_FIELDS">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">REQUIRED_FIELDS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('p_id',</span> <span class="pre">'program',</span> <span class="pre">'comments',</span> <span class="pre">'url',</span> <span class="pre">'status',</span> <span class="pre">'term',</span> <span class="pre">'us_or_international',</span> <span class="pre">'degree')</span></span><a class="headerlink" href="#src.load_data.REQUIRED_FIELDS" title="Link to this definition"></a></dt>
+<dd><p>Columns that may never be <code class="docutils literal notranslate"><span class="pre">NULL</span></code>; <a class="reference internal" href="#src.load_data.normalize_record" title="src.load_data.normalize_record"><code class="xref py py-func docutils literal notranslate"><span class="pre">normalize_record()</span></code></a> always fills them.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="src.load_data.COLUMNS">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">COLUMNS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('p_id',</span> <span class="pre">'program',</span> <span class="pre">'comments',</span> <span class="pre">'date_added',</span> <span class="pre">'url',</span> <span class="pre">'status',</span> <span class="pre">'term',</span> <span class="pre">'us_or_international',</span> <span class="pre">'gpa',</span> <span class="pre">'gre',</span> <span class="pre">'gre_v',</span> <span class="pre">'gre_aw',</span> <span class="pre">'degree',</span> <span class="pre">'llm_generated_program',</span> <span class="pre">'llm_generated_university')</span></span><a class="headerlink" href="#src.load_data.COLUMNS" title="Link to this definition"></a></dt>
+<dd><p>Every column of the <code class="docutils literal notranslate"><span class="pre">applicants</span></code> table, in insert order.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="src.load_data.DEFAULT_DATA_FILE">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_DATA_FILE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/Users/lukeellman/jhu_software_concepts/module_4/data/sample_applicant_data.json'</span></span><a class="headerlink" href="#src.load_data.DEFAULT_DATA_FILE" title="Link to this definition"></a></dt>
+<dd><p>Default dataset shipped with the repository so the loader never needs the network.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.load_data.extract_degree">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">extract_degree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/load_data.html#extract_degree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.load_data.extract_degree" title="Link to this definition"></a></dt>
+<dd><p>Map a free-text program string onto <code class="docutils literal notranslate"><span class="pre">PhD</span></code> / <code class="docutils literal notranslate"><span class="pre">Masters</span></code> / <code class="docutils literal notranslate"><span class="pre">Other</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.load_data.extract_university_and_program">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">extract_university_and_program</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/load_data.html#extract_university_and_program"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.load_data.extract_university_and_program" title="Link to this definition"></a></dt>
+<dd><p>Split <code class="docutils literal notranslate"><span class="pre">&quot;University</span> <span class="pre">-</span> <span class="pre">Program&quot;</span></code> into its two halves.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>raw</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.load_data.normalize_status">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">normalize_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/load_data.html#normalize_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.load_data.normalize_status" title="Link to this definition"></a></dt>
+<dd><p>Collapse the free-text decision column onto a small, queryable vocabulary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.load_data.parse_float">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">parse_float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/load_data.html#parse_float"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.load_data.parse_float" title="Link to this definition"></a></dt>
+<dd><p>Parse a float out of messy input, returning <code class="docutils literal notranslate"><span class="pre">None</span></code> when impossible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.load_data.parse_date">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">parse_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/load_data.html#parse_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.load_data.parse_date" title="Link to this definition"></a></dt>
+<dd><p>Parse the Grad Café <code class="docutils literal notranslate"><span class="pre">date_added</span></code> column into a <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.14)"><em>date</em></a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.load_data.derive_p_id">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">derive_p_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/load_data.html#derive_p_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.load_data.derive_p_id" title="Link to this definition"></a></dt>
+<dd><p>Derive the primary key for a record.</p>
+<p>The Grad Café result URL (<code class="docutils literal notranslate"><span class="pre">.../result/1020482</span></code>) carries a stable numeric
+id, which makes re-pulled records collapse onto the same row.  When no URL
+is available a deterministic hash of the identifying fields is used so that
+the same record still maps to the same <code class="docutils literal notranslate"><span class="pre">p_id</span></code> on every pull.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>record</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em>) – raw or normalised record.</p></li>
+<li><p><strong>fallback</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – value returned when the record carries no identity at all.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.load_data.normalize_record">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">normalize_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/load_data.html#normalize_record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.load_data.normalize_record" title="Link to this definition"></a></dt>
+<dd><p>Turn one raw record into a fully populated <code class="docutils literal notranslate"><span class="pre">applicants</span></code> row.</p>
+<p>Accepts both the scraper’s raw key names (<code class="docutils literal notranslate"><span class="pre">&quot;GPA&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;US/International&quot;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&quot;llm-generated-program&quot;</span></code>) and the database column names, so cleaned data
+and re-read database rows both normalise cleanly.  Every column listed in
+<a class="reference internal" href="#src.load_data.REQUIRED_FIELDS" title="src.load_data.REQUIRED_FIELDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">REQUIRED_FIELDS</span></code></a> is guaranteed to be non-<code class="docutils literal notranslate"><span class="pre">NULL</span></code> on the way out.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>record</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em>) – the raw record.</p></li>
+<li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – 1-based position in the batch, used only as a last-resort id.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a dict keyed by <a class="reference internal" href="#src.load_data.COLUMNS" title="src.load_data.COLUMNS"><code class="xref py py-data docutils literal notranslate"><span class="pre">COLUMNS</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.load_data.normalize_records">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">normalize_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/load_data.html#normalize_records"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.load_data.normalize_records" title="Link to this definition"></a></dt>
+<dd><p>Normalise a batch of records with <a class="reference internal" href="#src.load_data.normalize_record" title="src.load_data.normalize_record"><code class="xref py py-func docutils literal notranslate"><span class="pre">normalize_record()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>records</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.14)"><em>Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.load_data.ensure_schema">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">ensure_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/load_data.html#ensure_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.load_data.ensure_schema" title="Link to this definition"></a></dt>
+<dd><p>Create the <code class="docutils literal notranslate"><span class="pre">applicants</span></code> table when it does not already exist.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>conn</strong> (<em>Connection</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.load_data.reset_schema">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">reset_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/load_data.html#reset_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.load_data.reset_schema" title="Link to this definition"></a></dt>
+<dd><p>Drop and recreate the <code class="docutils literal notranslate"><span class="pre">applicants</span></code> table (used by tests and re-seeds).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>conn</strong> (<em>Connection</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.load_data.insert_rows">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">insert_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/load_data.html#insert_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.load_data.insert_rows" title="Link to this definition"></a></dt>
+<dd><p>Insert records into <code class="docutils literal notranslate"><span class="pre">applicants</span></code> and return how many rows were new.</p>
+<p>The insert is idempotent: rows whose <code class="docutils literal notranslate"><span class="pre">p_id</span></code> already exists are skipped by
+<code class="docutils literal notranslate"><span class="pre">ON</span> <span class="pre">CONFLICT</span> <span class="pre">(p_id)</span> <span class="pre">DO</span> <span class="pre">NOTHING</span></code>, so the returned count is the number of
+genuinely new rows rather than the number of records supplied.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>records</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.14)"><em>Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em><em>]</em>) – raw records (<code class="docutils literal notranslate"><span class="pre">normalize=True</span></code>) or ready-made rows.</p></li>
+<li><p><strong>conn</strong> (<em>Connection</em><em> | </em><em>None</em>) – an existing connection to reuse; when <code class="docutils literal notranslate"><span class="pre">None</span></code> a new one is
+opened from <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> and closed again before returning.</p></li>
+<li><p><strong>database_url</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – connection-string override used when <code class="docutils literal notranslate"><span class="pre">conn</span> <span class="pre">is</span> <span class="pre">None</span></code>.</p></li>
+<li><p><strong>normalize</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – run <a class="reference internal" href="#src.load_data.normalize_record" title="src.load_data.normalize_record"><code class="xref py py-func docutils literal notranslate"><span class="pre">normalize_record()</span></code></a> over each record first.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>number of rows inserted.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>psycopg.Error</strong> – the whole batch is rolled back on any failure.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.load_data.read_records">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">read_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/load_data.html#read_records"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.load_data.read_records" title="Link to this definition"></a></dt>
+<dd><p>Read a JSON array of records from disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – file to read; defaults to <a class="reference internal" href="#src.load_data.DEFAULT_DATA_FILE" title="src.load_data.DEFAULT_DATA_FILE"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEFAULT_DATA_FILE</span></code></a> (or the
+<code class="docutils literal notranslate"><span class="pre">GRADCAFE_DATA_FILE</span></code> environment variable when set).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.load_data.load_data">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/load_data.html#load_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.load_data.load_data" title="Link to this definition"></a></dt>
+<dd><p>Load a JSON dataset from disk into PostgreSQL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – dataset to read, see <a class="reference internal" href="#src.load_data.read_records" title="src.load_data.read_records"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_records()</span></code></a>.</p></li>
+<li><p><strong>database_url</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – connection-string override.</p></li>
+<li><p><strong>reset</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – drop and recreate the table before loading.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>number of rows inserted.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.load_data.main">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/load_data.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.load_data.main" title="Link to this definition"></a></dt>
+<dd><p>Command-line entry point: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">src.load_data</span> <span class="pre">--reset</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>] </em><em>| </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.query_data">
+<span id="reporting"></span><h2>Reporting<a class="headerlink" href="#module-src.query_data" title="Link to this heading"></a></h2>
+<p>Reporting layer: the SQL behind the analysis page.</p>
+<p>Each question rendered on <code class="docutils literal notranslate"><span class="pre">/analysis</span></code> is declared once as an
+<a class="reference internal" href="#src.query_data.AnalysisSpec" title="src.query_data.AnalysisSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisSpec</span></code></a> – key, human question, formatting kind and SQL.  That
+single declaration drives the raw values (<a class="reference internal" href="#src.query_data.get_analysis" title="src.query_data.get_analysis"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_analysis()</span></code></a>), the formatted
+answers (<a class="reference internal" href="#src.query_data.get_analysis_items" title="src.query_data.get_analysis_items"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_analysis_items()</span></code></a>) and the command-line report
+(<a class="reference internal" href="#src.query_data.run_queries" title="src.query_data.run_queries"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_queries()</span></code></a>), so the page and the CLI can never drift apart.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.query_data.AnalysisSpec">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">src.query_data.</span></span><span class="sig-name descname"><span class="pre">AnalysisSpec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">question</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sql</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/query_data.html#AnalysisSpec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.query_data.AnalysisSpec" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NamedTuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NamedTuple</span></code></a></p>
+<p>One question on the analysis page.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – key used in the analysis dictionary and the template.</p></li>
+<li><p><strong>question</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – question text rendered next to the <code class="docutils literal notranslate"><span class="pre">Answer:</span></code> label.</p></li>
+<li><p><strong>kind</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – <code class="docutils literal notranslate"><span class="pre">&quot;count&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;percent&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;float&quot;</span></code>; selects the
+formatter used by <a class="reference internal" href="#src.query_data.format_answer" title="src.query_data.format_answer"><code class="xref py py-func docutils literal notranslate"><span class="pre">format_answer()</span></code></a>.</p></li>
+<li><p><strong>sql</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – SQL returning exactly one scalar value.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.query_data.AnalysisSpec.key">
+<span class="sig-name descname"><span class="pre">key</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#src.query_data.AnalysisSpec.key" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.query_data.AnalysisSpec.question">
+<span class="sig-name descname"><span class="pre">question</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#src.query_data.AnalysisSpec.question" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.query_data.AnalysisSpec.kind">
+<span class="sig-name descname"><span class="pre">kind</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#src.query_data.AnalysisSpec.kind" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.query_data.AnalysisSpec.sql">
+<span class="sig-name descname"><span class="pre">sql</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#src.query_data.AnalysisSpec.sql" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="src.query_data.EXPECTED_KEYS">
+<span class="sig-prename descclassname"><span class="pre">src.query_data.</span></span><span class="sig-name descname"><span class="pre">EXPECTED_KEYS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('total_applicants',</span> <span class="pre">'fall_2026_count',</span> <span class="pre">'percent_international',</span> <span class="pre">'overall_acceptance_percent',</span> <span class="pre">'avg_gpa',</span> <span class="pre">'avg_gre',</span> <span class="pre">'avg_gre_v',</span> <span class="pre">'avg_gre_aw',</span> <span class="pre">'avg_gpa_american_fall_2026',</span> <span class="pre">'fall_2025_acceptance_percent',</span> <span class="pre">'avg_gpa_accepted_fall_2026',</span> <span class="pre">'jhu_masters_cs_count',</span> <span class="pre">'fall_2026_phd_cs_acceptances',</span> <span class="pre">'llm_fall_2026_phd_cs_acceptances',</span> <span class="pre">'avg_gpa_phd',</span> <span class="pre">'avg_gpa_masters',</span> <span class="pre">'acceptance_percent_high_gpa',</span> <span class="pre">'acceptance_percent_low_gpa')</span></span><a class="headerlink" href="#src.query_data.EXPECTED_KEYS" title="Link to this definition"></a></dt>
+<dd><p>Keys the analysis template expects <a class="reference internal" href="#src.query_data.get_analysis" title="src.query_data.get_analysis"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_analysis()</span></code></a> to provide.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="src.query_data.ROW_KEYS">
+<span class="sig-prename descclassname"><span class="pre">src.query_data.</span></span><span class="sig-name descname"><span class="pre">ROW_KEYS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('p_id',</span> <span class="pre">'program',</span> <span class="pre">'comments',</span> <span class="pre">'date_added',</span> <span class="pre">'url',</span> <span class="pre">'status',</span> <span class="pre">'term',</span> <span class="pre">'us_or_international',</span> <span class="pre">'gpa',</span> <span class="pre">'gre',</span> <span class="pre">'gre_v',</span> <span class="pre">'gre_aw',</span> <span class="pre">'degree',</span> <span class="pre">'llm_generated_program',</span> <span class="pre">'llm_generated_university')</span></span><a class="headerlink" href="#src.query_data.ROW_KEYS" title="Link to this definition"></a></dt>
+<dd><p>Columns of <code class="docutils literal notranslate"><span class="pre">applicants</span></code> that <a class="reference internal" href="#src.query_data.get_recent_rows" title="src.query_data.get_recent_rows"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_recent_rows()</span></code></a> returns.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.query_data.format_percent">
+<span class="sig-prename descclassname"><span class="pre">src.query_data.</span></span><span class="sig-name descname"><span class="pre">format_percent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/query_data.html#format_percent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.query_data.format_percent" title="Link to this definition"></a></dt>
+<dd><p>Format a percentage with exactly two decimal places, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;39.28%&quot;</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> | </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.query_data.format_float">
+<span class="sig-prename descclassname"><span class="pre">src.query_data.</span></span><span class="sig-name descname"><span class="pre">format_float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/query_data.html#format_float"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.query_data.format_float" title="Link to this definition"></a></dt>
+<dd><p>Format an average with two decimals, or <code class="docutils literal notranslate"><span class="pre">&quot;N/A&quot;</span></code> when there is no data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> | </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.query_data.format_count">
+<span class="sig-prename descclassname"><span class="pre">src.query_data.</span></span><span class="sig-name descname"><span class="pre">format_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/query_data.html#format_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.query_data.format_count" title="Link to this definition"></a></dt>
+<dd><p>Format a row count with thousands separators.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> | </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.query_data.format_answer">
+<span class="sig-prename descclassname"><span class="pre">src.query_data.</span></span><span class="sig-name descname"><span class="pre">format_answer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/query_data.html#format_answer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.query_data.format_answer" title="Link to this definition"></a></dt>
+<dd><p>Format <code class="docutils literal notranslate"><span class="pre">value</span></code> according to an <a class="reference internal" href="#src.query_data.AnalysisSpec" title="src.query_data.AnalysisSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisSpec</span></code></a> <code class="docutils literal notranslate"><span class="pre">kind</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kind</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.query_data.get_analysis">
+<span class="sig-prename descclassname"><span class="pre">src.query_data.</span></span><span class="sig-name descname"><span class="pre">get_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/query_data.html#get_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.query_data.get_analysis" title="Link to this definition"></a></dt>
+<dd><p>Run every <code class="xref py py-data docutils literal notranslate"><span class="pre">ANALYSIS_SPECS</span></code> query and return the raw values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conn</strong> (<em>Connection</em><em> | </em><em>None</em>) – connection to reuse; when <code class="docutils literal notranslate"><span class="pre">None</span></code> one is opened from
+<code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> and closed before returning.</p></li>
+<li><p><strong>database_url</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – connection-string override.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict keyed by <a class="reference internal" href="#src.query_data.EXPECTED_KEYS" title="src.query_data.EXPECTED_KEYS"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXPECTED_KEYS</span></code></a>; counts are ints, averages and
+percentages are floats or <code class="docutils literal notranslate"><span class="pre">None</span></code> when the query matched no rows.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.query_data.get_analysis_items">
+<span class="sig-prename descclassname"><span class="pre">src.query_data.</span></span><span class="sig-name descname"><span class="pre">get_analysis_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/query_data.html#get_analysis_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.query_data.get_analysis_items" title="Link to this definition"></a></dt>
+<dd><p>Pair each question with its formatted answer, ready for the template.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>analysis</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em>) – output of <a class="reference internal" href="#src.query_data.get_analysis" title="src.query_data.get_analysis"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_analysis()</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of <code class="docutils literal notranslate"><span class="pre">{&quot;key&quot;,</span> <span class="pre">&quot;question&quot;,</span> <span class="pre">&quot;answer&quot;}</span></code> dicts in page order.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.query_data.get_recent_rows">
+<span class="sig-prename descclassname"><span class="pre">src.query_data.</span></span><span class="sig-name descname"><span class="pre">get_recent_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/query_data.html#get_recent_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.query_data.get_recent_rows" title="Link to this definition"></a></dt>
+<dd><p>Return the most recently loaded rows as dicts keyed by <a class="reference internal" href="#src.query_data.ROW_KEYS" title="src.query_data.ROW_KEYS"><code class="xref py py-data docutils literal notranslate"><span class="pre">ROW_KEYS</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>limit</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – maximum number of rows to return.</p></li>
+<li><p><strong>conn</strong> (<em>Connection</em><em> | </em><em>None</em>) – connection to reuse; opened from <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> when <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>database_url</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – connection-string override.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.query_data.count_rows">
+<span class="sig-prename descclassname"><span class="pre">src.query_data.</span></span><span class="sig-name descname"><span class="pre">count_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/query_data.html#count_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.query_data.count_rows" title="Link to this definition"></a></dt>
+<dd><p>Return the number of rows in <code class="docutils literal notranslate"><span class="pre">applicants</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conn</strong> (<em>Connection</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>database_url</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.query_data.run_queries">
+<span class="sig-prename descclassname"><span class="pre">src.query_data.</span></span><span class="sig-name descname"><span class="pre">run_queries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/query_data.html#run_queries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.query_data.run_queries" title="Link to this definition"></a></dt>
+<dd><p>Print every question and answer to stdout and return the raw analysis.</p>
+<p>This is the command-line equivalent of the <code class="docutils literal notranslate"><span class="pre">/analysis</span></code> page:
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">src.query_data</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>database_url</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.models">
+<span id="orm-model"></span><h2>ORM model<a class="headerlink" href="#module-src.models" title="Link to this heading"></a></h2>
+<p>SQLAlchemy ORM mapping for the <code class="docutils literal notranslate"><span class="pre">applicants</span></code> table.</p>
+<p>The engine is created lazily by <a class="reference internal" href="#src.models.get_engine" title="src.models.get_engine"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_engine()</span></code></a> so that the connection
+string is read when a session is first requested rather than at import time –
+that is what lets the test suite point the ORM at a throwaway database.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.models.Applicant">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">src.models.</span></span><span class="sig-name descname"><span class="pre">Applicant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/models.html#Applicant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.Applicant" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></p>
+<p>One Grad Café entry; mirrors <code class="xref py py-data docutils literal notranslate"><span class="pre">src.load_data.CREATE_TABLE_SQL</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.Applicant.p_id">
+<span class="sig-name descname"><span class="pre">p_id</span></span><a class="headerlink" href="#src.models.Applicant.p_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.Applicant.program">
+<span class="sig-name descname"><span class="pre">program</span></span><a class="headerlink" href="#src.models.Applicant.program" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.Applicant.comments">
+<span class="sig-name descname"><span class="pre">comments</span></span><a class="headerlink" href="#src.models.Applicant.comments" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.Applicant.date_added">
+<span class="sig-name descname"><span class="pre">date_added</span></span><a class="headerlink" href="#src.models.Applicant.date_added" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.Applicant.url">
+<span class="sig-name descname"><span class="pre">url</span></span><a class="headerlink" href="#src.models.Applicant.url" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.Applicant.status">
+<span class="sig-name descname"><span class="pre">status</span></span><a class="headerlink" href="#src.models.Applicant.status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.Applicant.term">
+<span class="sig-name descname"><span class="pre">term</span></span><a class="headerlink" href="#src.models.Applicant.term" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.Applicant.us_or_international">
+<span class="sig-name descname"><span class="pre">us_or_international</span></span><a class="headerlink" href="#src.models.Applicant.us_or_international" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.Applicant.gpa">
+<span class="sig-name descname"><span class="pre">gpa</span></span><a class="headerlink" href="#src.models.Applicant.gpa" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.Applicant.gre">
+<span class="sig-name descname"><span class="pre">gre</span></span><a class="headerlink" href="#src.models.Applicant.gre" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.Applicant.gre_v">
+<span class="sig-name descname"><span class="pre">gre_v</span></span><a class="headerlink" href="#src.models.Applicant.gre_v" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.Applicant.gre_aw">
+<span class="sig-name descname"><span class="pre">gre_aw</span></span><a class="headerlink" href="#src.models.Applicant.gre_aw" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.Applicant.degree">
+<span class="sig-name descname"><span class="pre">degree</span></span><a class="headerlink" href="#src.models.Applicant.degree" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.Applicant.llm_generated_program">
+<span class="sig-name descname"><span class="pre">llm_generated_program</span></span><a class="headerlink" href="#src.models.Applicant.llm_generated_program" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.models.Applicant.llm_generated_university">
+<span class="sig-name descname"><span class="pre">llm_generated_university</span></span><a class="headerlink" href="#src.models.Applicant.llm_generated_university" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.models.Applicant.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/models.html#Applicant.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.Applicant.to_dict" title="Link to this definition"></a></dt>
+<dd><p>Return the row as a plain dict keyed by column name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.models.get_engine">
+<span class="sig-prename descclassname"><span class="pre">src.models.</span></span><span class="sig-name descname"><span class="pre">get_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/models.html#get_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.get_engine" title="Link to this definition"></a></dt>
+<dd><p>Return (and cache) the SQLAlchemy engine for a connection string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>database_url</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.sqlalchemy.org/en/20/core/connections.html#sqlalchemy.engine.Engine" title="(in SQLAlchemy v2.0)"><em>Engine</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.models.get_session_factory">
+<span class="sig-prename descclassname"><span class="pre">src.models.</span></span><span class="sig-name descname"><span class="pre">get_session_factory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/models.html#get_session_factory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.get_session_factory" title="Link to this definition"></a></dt>
+<dd><p>Return a <a class="reference external" href="https://docs.sqlalchemy.org/en/20/orm/session_api.html#sqlalchemy.orm.sessionmaker" title="(in SQLAlchemy v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.sessionmaker</span></code></a> bound to the engine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>database_url</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.sqlalchemy.org/en/20/orm/session_api.html#sqlalchemy.orm.sessionmaker" title="(in SQLAlchemy v2.0)"><em>sessionmaker</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.models.get_db_session">
+<span class="sig-prename descclassname"><span class="pre">src.models.</span></span><span class="sig-name descname"><span class="pre">get_db_session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/models.html#get_db_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.models.get_db_session" title="Link to this definition"></a></dt>
+<dd><p>Open a new ORM session against <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> (or the override).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>database_url</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.sqlalchemy.org/en/20/orm/session_api.html#sqlalchemy.orm.Session" title="(in SQLAlchemy v2.0)"><em>Session</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.orm_queries">
+<span id="orm-report"></span><h2>ORM report<a class="headerlink" href="#module-src.orm_queries" title="Link to this heading"></a></h2>
+<p>The Module-3 SQLAlchemy ORM report.</p>
+<p>Answers a subset of the analysis questions through the ORM instead of raw SQL,
+demonstrating that both access paths agree.  Run it with
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">src.orm_queries</span></code>.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.orm_queries.run_orm_queries">
+<span class="sig-prename descclassname"><span class="pre">src.orm_queries.</span></span><span class="sig-name descname"><span class="pre">run_orm_queries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/orm_queries.html#run_orm_queries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.orm_queries.run_orm_queries" title="Link to this definition"></a></dt>
+<dd><p>Run the ORM report and return its answers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>session</strong> (<a class="reference external" href="https://docs.sqlalchemy.org/en/20/orm/session_api.html#sqlalchemy.orm.Session" title="(in SQLAlchemy v2.0)"><em>Session</em></a><em> | </em><em>None</em>) – an existing ORM session to reuse; one is opened and closed
+for you when omitted.</p></li>
+<li><p><strong>database_url</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – connection-string override used to open a session.</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – print the formatted answers to stdout.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict of raw (unformatted) answers.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.db">
+<span id="connections"></span><h2>Connections<a class="headerlink" href="#module-src.db" title="Link to this heading"></a></h2>
+<p>Database connection helpers.</p>
+<p>Every module reads the connection string from the <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> environment
+variable so that the application, the test suite and CI can each point at a
+different PostgreSQL instance without code changes.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="src.db.DEFAULT_DATABASE_URL">
+<span class="sig-prename descclassname"><span class="pre">src.db.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_DATABASE_URL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'postgresql://localhost/gradcafe'</span></span><a class="headerlink" href="#src.db.DEFAULT_DATABASE_URL" title="Link to this definition"></a></dt>
+<dd><p>Used when <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> is not set in the environment.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.db.get_database_url">
+<span class="sig-prename descclassname"><span class="pre">src.db.</span></span><span class="sig-name descname"><span class="pre">get_database_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/db.html#get_database_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.db.get_database_url" title="Link to this definition"></a></dt>
+<dd><p>Return the PostgreSQL connection string to use.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>database_url</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – explicit override; when <code class="docutils literal notranslate"><span class="pre">None</span></code> the <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code>
+environment variable is used, falling back to
+<a class="reference internal" href="#src.db.DEFAULT_DATABASE_URL" title="src.db.DEFAULT_DATABASE_URL"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEFAULT_DATABASE_URL</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a libpq connection string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.db.sqlalchemy_url">
+<span class="sig-prename descclassname"><span class="pre">src.db.</span></span><span class="sig-name descname"><span class="pre">sqlalchemy_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/db.html#sqlalchemy_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.db.sqlalchemy_url" title="Link to this definition"></a></dt>
+<dd><p>Return <a class="reference internal" href="#src.db.get_database_url" title="src.db.get_database_url"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_database_url()</span></code></a> rewritten for the SQLAlchemy psycopg driver.</p>
+<p><code class="docutils literal notranslate"><span class="pre">postgresql://host/db</span></code> becomes <code class="docutils literal notranslate"><span class="pre">postgresql+psycopg://host/db</span></code> so that
+SQLAlchemy uses psycopg 3 rather than the (unavailable) psycopg2 default.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>database_url</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.db.connect">
+<span class="sig-prename descclassname"><span class="pre">src.db.</span></span><span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/db.html#connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.db.connect" title="Link to this definition"></a></dt>
+<dd><p>Open a new psycopg connection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>database_url</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – optional connection-string override.</p></li>
+<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>) – forwarded to <code class="xref py py-func docutils literal notranslate"><span class="pre">psycopg.connect()</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Connection</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="architecture.html" class="btn btn-neutral float-left" title="Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="testing.html" class="btn btn-neutral float-right" title="Testing guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Luke Ellman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
