@@ -219,3 +219,9 @@ body {
     color: #1a365d;
     margin-top: 6px;
 }
+
+.alert-error {
+    background-color: #fff5f5;
+    border-left-color: #e53e3e;
+    color: #9b2c2c;
+}

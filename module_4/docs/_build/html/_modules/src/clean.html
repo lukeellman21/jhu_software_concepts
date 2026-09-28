@@ -76,7 +76,7 @@
   <h1>Source code for src.clean</h1><div class="highlight"><pre>
 <span></span><span class="sd">"""ETL transform layer: sanitise raw scraped records.</span>
 
-<span class="sd">:func:`clean_records` is deliberately conservative -- it normalises whitespace</span>
+<span class="sd">:func:`clean_data` is deliberately conservative -- it normalises whitespace</span>
 <span class="sd">and coerces the numeric fields, but leaves the record keys exactly as the</span>
 <span class="sd">scraper produced them so that :func:`src.load_data.normalize_record` remains the</span>
 <span class="sd">single place where database columns are decided.</span>
@@ -186,12 +186,23 @@
 
 
 
-<div class="viewcode-block" id="clean_records">
-<a class="viewcode-back" href="../../api.html#src.clean.clean_records">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">clean_records</span><span class="p">(</span><span class="n">records</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">"""Clean a batch of raw records with :func:`clean_record`."""</span>
+<div class="viewcode-block" id="clean_data">
+<a class="viewcode-back" href="../../api.html#src.clean.clean_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">clean_data</span><span class="p">(</span><span class="n">records</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Clean a batch of raw records with :func:`clean_record`.</span>
+
+<span class="sd">    This is the module's public entry point; :func:`clean_records` is kept as an</span>
+<span class="sd">    alias so existing callers keep working.</span>
+
+<span class="sd">    :param records: raw records as produced by :mod:`src.scrape`.</span>
+<span class="sd">    :returns: one cleaned record per input record, keyed by :data:`CLEAN_KEYS`.</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">clean_record</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">records</span><span class="p">]</span></div>
 
+
+
+<span class="c1">#: Alias for :func:`clean_data`.</span>
+<span class="n">clean_records</span> <span class="o">=</span> <span class="n">clean_data</span>
 
 
 <div class="viewcode-block" id="clean_file">
@@ -211,7 +222,7 @@
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
         <span class="n">raw</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
 
-    <span class="n">cleaned</span> <span class="o">=</span> <span class="n">clean_records</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+    <span class="n">cleaned</span> <span class="o">=</span> <span class="n">clean_data</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
         <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">cleaned</span><span class="p">,</span> <span class="n">handle</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">cleaned</span><span class="p">)</span></div>

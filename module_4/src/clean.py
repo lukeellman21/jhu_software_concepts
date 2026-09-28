@@ -1,6 +1,6 @@
 """ETL transform layer: sanitise raw scraped records.
 
-:func:`clean_records` is deliberately conservative -- it normalises whitespace
+:func:`clean_data` is deliberately conservative -- it normalises whitespace
 and coerces the numeric fields, but leaves the record keys exactly as the
 scraper produced them so that :func:`src.load_data.normalize_record` remains the
 single place where database columns are decided.
@@ -95,9 +95,20 @@ def clean_record(entry: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def clean_records(records: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Clean a batch of raw records with :func:`clean_record`."""
+def clean_data(records: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Clean a batch of raw records with :func:`clean_record`.
+
+    This is the module's public entry point; :func:`clean_records` is kept as an
+    alias so existing callers keep working.
+
+    :param records: raw records as produced by :mod:`src.scrape`.
+    :returns: one cleaned record per input record, keyed by :data:`CLEAN_KEYS`.
+    """
     return [clean_record(entry) for entry in records]
+
+
+#: Alias for :func:`clean_data`.
+clean_records = clean_data
 
 
 def clean_file(input_path: str, output_path: str) -> int:
@@ -115,7 +126,7 @@ def clean_file(input_path: str, output_path: str) -> int:
     with open(source, "r", encoding="utf-8") as handle:
         raw = json.load(handle)
 
-    cleaned = clean_records(raw)
+    cleaned = clean_data(raw)
     with open(output_path, "w", encoding="utf-8") as handle:
         json.dump(cleaned, handle, indent=2, ensure_ascii=False)
     return len(cleaned)

@@ -51,6 +51,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#routes">Routes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#src.flask_app.EXTENSION_KEY"><code class="docutils literal notranslate"><span class="pre">EXTENSION_KEY</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#src.flask_app.PULL_BUTTON_TESTID"><code class="docutils literal notranslate"><span class="pre">PULL_BUTTON_TESTID</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.flask_app.DATABASE_UNAVAILABLE_MESSAGE"><code class="docutils literal notranslate"><span class="pre">DATABASE_UNAVAILABLE_MESSAGE</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#src.flask_app.PullState"><code class="docutils literal notranslate"><span class="pre">PullState</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#src.flask_app.PullState.error"><code class="docutils literal notranslate"><span class="pre">PullState.error</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#src.flask_app.PullState.last_pull"><code class="docutils literal notranslate"><span class="pre">PullState.last_pull</span></code></a></li>
@@ -100,6 +101,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#src.clean.clean_gre"><code class="docutils literal notranslate"><span class="pre">clean_gre()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#src.clean.clean_gre_aw"><code class="docutils literal notranslate"><span class="pre">clean_gre_aw()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#src.clean.clean_record"><code class="docutils literal notranslate"><span class="pre">clean_record()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.clean.clean_data"><code class="docutils literal notranslate"><span class="pre">clean_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#src.clean.clean_records"><code class="docutils literal notranslate"><span class="pre">clean_records()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#src.clean.clean_file"><code class="docutils literal notranslate"><span class="pre">clean_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#src.clean.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
@@ -110,6 +112,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#src.load_data.REQUIRED_FIELDS"><code class="docutils literal notranslate"><span class="pre">REQUIRED_FIELDS</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#src.load_data.COLUMNS"><code class="docutils literal notranslate"><span class="pre">COLUMNS</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#src.load_data.DEFAULT_DATA_FILE"><code class="docutils literal notranslate"><span class="pre">DEFAULT_DATA_FILE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#src.load_data.CONNECTION_HELP"><code class="docutils literal notranslate"><span class="pre">CONNECTION_HELP</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#src.load_data.extract_degree"><code class="docutils literal notranslate"><span class="pre">extract_degree()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#src.load_data.extract_university_and_program"><code class="docutils literal notranslate"><span class="pre">extract_university_and_program()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#src.load_data.normalize_status"><code class="docutils literal notranslate"><span class="pre">normalize_status()</span></code></a></li>
@@ -253,6 +256,12 @@ while a pull is in progress (in which case nothing is recomputed).</p>
 <span class="sig-prename descclassname"><span class="pre">src.flask_app.</span></span><span class="sig-name descname"><span class="pre">PULL_BUTTON_TESTID</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pull-data-btn'</span></span><a class="headerlink" href="#src.flask_app.PULL_BUTTON_TESTID" title="Link to this definition"></a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">data-testid</span></code> values the UI tests rely on; they must match the literals in
 <code class="docutils literal notranslate"><span class="pre">templates/analysis.html</span></code> (the page tests fail if they drift apart).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="src.flask_app.DATABASE_UNAVAILABLE_MESSAGE">
+<span class="sig-prename descclassname"><span class="pre">src.flask_app.</span></span><span class="sig-name descname"><span class="pre">DATABASE_UNAVAILABLE_MESSAGE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'The</span> <span class="pre">analysis</span> <span class="pre">database</span> <span class="pre">is</span> <span class="pre">unreachable,</span> <span class="pre">so</span> <span class="pre">the</span> <span class="pre">answers</span> <span class="pre">below</span> <span class="pre">are</span> <span class="pre">unavailable.</span> <span class="pre">Check</span> <span class="pre">that</span> <span class="pre">PostgreSQL</span> <span class="pre">is</span> <span class="pre">running</span> <span class="pre">(`pg_isready`)</span> <span class="pre">and</span> <span class="pre">that</span> <span class="pre">DATABASE_URL</span> <span class="pre">points</span> <span class="pre">at</span> <span class="pre">an</span> <span class="pre">existing</span> <span class="pre">database,</span> <span class="pre">then</span> <span class="pre">reload</span> <span class="pre">this</span> <span class="pre">page.'</span></span><a class="headerlink" href="#src.flask_app.DATABASE_UNAVAILABLE_MESSAGE" title="Link to this definition"></a></dt>
+<dd><p>Shown on the page when PostgreSQL cannot be reached, instead of a 500.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -416,6 +425,8 @@ busy-state tests free of sleeps and threads.</p>
 <p>The page renders the cached analysis snapshot, computing one on first visit
 so a fresh application is never blank.  <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code> refreshes
 the snapshot.</p>
+<p>If PostgreSQL cannot be reached the page still renders, with every answer
+blank and a banner explaining the problem, rather than failing with a 500.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -645,7 +656,7 @@ canned HTML, so no test ever touches the network.</p>
 <section id="module-src.clean">
 <span id="etl-transform"></span><h2>ETL: transform<a class="headerlink" href="#module-src.clean" title="Link to this heading"></a></h2>
 <p>ETL transform layer: sanitise raw scraped records.</p>
-<p><a class="reference internal" href="#src.clean.clean_records" title="src.clean.clean_records"><code class="xref py py-func docutils literal notranslate"><span class="pre">clean_records()</span></code></a> is deliberately conservative – it normalises whitespace
+<p><a class="reference internal" href="#src.clean.clean_data" title="src.clean.clean_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">clean_data()</span></code></a> is deliberately conservative – it normalises whitespace
 and coerces the numeric fields, but leaves the record keys exactly as the
 scraper produced them so that <a class="reference internal" href="#src.load_data.normalize_record" title="src.load_data.normalize_record"><code class="xref py py-func docutils literal notranslate"><span class="pre">src.load_data.normalize_record()</span></code></a> remains the
 single place where database columns are decided.</p>
@@ -726,9 +737,28 @@ single place where database columns are decided.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.clean.clean_records">
-<span class="sig-prename descclassname"><span class="pre">src.clean.</span></span><span class="sig-name descname"><span class="pre">clean_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/clean.html#clean_records"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.clean.clean_records" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.clean.clean_data">
+<span class="sig-prename descclassname"><span class="pre">src.clean.</span></span><span class="sig-name descname"><span class="pre">clean_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/clean.html#clean_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.clean.clean_data" title="Link to this definition"></a></dt>
 <dd><p>Clean a batch of raw records with <a class="reference internal" href="#src.clean.clean_record" title="src.clean.clean_record"><code class="xref py py-func docutils literal notranslate"><span class="pre">clean_record()</span></code></a>.</p>
+<p>This is the module’s public entry point; <a class="reference internal" href="#src.clean.clean_records" title="src.clean.clean_records"><code class="xref py py-func docutils literal notranslate"><span class="pre">clean_records()</span></code></a> is kept as an
+alias so existing callers keep working.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>records</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.14)"><em>Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em><em>]</em>) – raw records as produced by <a class="reference internal" href="#module-src.scrape" title="src.scrape"><code class="xref py py-mod docutils literal notranslate"><span class="pre">src.scrape</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>one cleaned record per input record, keyed by <a class="reference internal" href="#src.clean.CLEAN_KEYS" title="src.clean.CLEAN_KEYS"><code class="xref py py-data docutils literal notranslate"><span class="pre">CLEAN_KEYS</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.clean.clean_records">
+<span class="sig-prename descclassname"><span class="pre">src.clean.</span></span><span class="sig-name descname"><span class="pre">clean_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.clean.clean_records" title="Link to this definition"></a></dt>
+<dd><p>Alias for <a class="reference internal" href="#src.clean.clean_data" title="src.clean.clean_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">clean_data()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>records</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.14)"><em>Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em><em>]</em>)</p>
@@ -811,6 +841,12 @@ fields (see <a class="reference internal" href="#src.load_data.derive_p_id" titl
 <dt class="sig sig-object py" id="src.load_data.DEFAULT_DATA_FILE">
 <span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_DATA_FILE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/Users/lukeellman/jhu_software_concepts/module_4/data/sample_applicant_data.json'</span></span><a class="headerlink" href="#src.load_data.DEFAULT_DATA_FILE" title="Link to this definition"></a></dt>
 <dd><p>Default dataset shipped with the repository so the loader never needs the network.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="src.load_data.CONNECTION_HELP">
+<span class="sig-prename descclassname"><span class="pre">src.load_data.</span></span><span class="sig-name descname"><span class="pre">CONNECTION_HELP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Could</span> <span class="pre">not</span> <span class="pre">connect</span> <span class="pre">to</span> <span class="pre">PostgreSQL</span> <span class="pre">at</span> <span class="pre">{url}.\n</span>&#160; <span class="pre">1.</span> <span class="pre">Is</span> <span class="pre">the</span> <span class="pre">server</span> <span class="pre">running?</span>&#160; <span class="pre">Check</span> <span class="pre">with</span> <span class="pre">`pg_isready`.\n</span>&#160; <span class="pre">2.</span> <span class="pre">Does</span> <span class="pre">the</span> <span class="pre">database</span> <span class="pre">exist?</span>&#160; <span class="pre">Create</span> <span class="pre">it</span> <span class="pre">with</span> <span class="pre">`createdb</span> <span class="pre">gradcafe`.\n</span>&#160; <span class="pre">3.</span> <span class="pre">Is</span> <span class="pre">DATABASE_URL</span> <span class="pre">correct?</span>&#160; <span class="pre">It</span> <span class="pre">is</span> <span class="pre">read</span> <span class="pre">from</span> <span class="pre">the</span> <span class="pre">environment.\nNothing</span> <span class="pre">was</span> <span class="pre">loaded;</span> <span class="pre">re-run</span> <span class="pre">once</span> <span class="pre">the</span> <span class="pre">server</span> <span class="pre">is</span> <span class="pre">reachable.\nOriginal</span> <span class="pre">error:</span> <span class="pre">{error}'</span></span><a class="headerlink" href="#src.load_data.CONNECTION_HELP" title="Link to this definition"></a></dt>
+<dd><p>Printed when the loader cannot reach PostgreSQL, so the operator knows what to fix.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1041,10 +1077,15 @@ opened from <code class="docutils literal notranslate"><span class="pre">DATABAS
 <dd><p>Command-line entry point: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">src.load_data</span> <span class="pre">--reset</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>] </em><em>| </em><em>None</em>)</p>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>] </em><em>| </em><em>None</em>) – argument list; <code class="docutils literal notranslate"><span class="pre">None</span></code> reads <code class="docutils literal notranslate"><span class="pre">sys.argv</span></code>.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">0</span></code> when the load succeeded, <code class="docutils literal notranslate"><span class="pre">1</span></code> when the database could not
+be reached.  <code class="docutils literal notranslate"><span class="pre">__main__</span></code> passes the value to <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#SystemExit" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SystemExit</span></code></a>, so a
+failed load exits non-zero.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a></p>
 </dd>
 </dl>
 </dd></dl>

@@ -151,6 +151,8 @@ than CSS classes or copy:
      - the two status lines
    * - ``data-testid="pull-error"``
      - error banner, rendered only after a failed pull
+   * - ``data-testid="db-error"``
+     - banner shown only when PostgreSQL is unreachable
 
 Percentages are asserted with ``re.compile(r"\d+(?:,\d{3})*(?:\.(\d+))?%")``:
 every match must capture exactly two decimal digits.

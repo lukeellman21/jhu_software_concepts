@@ -112,6 +112,26 @@
 
 <span class="n">_ACCEPTED</span> <span class="o">=</span> <span class="s2">"(status ILIKE '</span><span class="si">%a</span><span class="s2">ccepted%' OR status ILIKE '</span><span class="si">%a</span><span class="s2">cceptance%')"</span>
 
+<span class="c1">#: The universities Module 3's questions 8 and 9 ask about.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Full names are matched with ``ILIKE``; the abbreviations use the PostgreSQL</span>
+<span class="c1">#: word-boundary operator ``~*`` with ``\y`` so that ``MIT`` matches "MIT" but</span>
+<span class="c1">#: not the "mit" inside "Smith College", which is what made the Module-3</span>
+<span class="c1">#: counts too high.</span>
+<span class="n">_TARGET_UNIVERSITIES</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"</span><span class="si">{column}</span><span class="s2"> ILIKE '</span><span class="si">%G</span><span class="s2">eorgetown%'"</span><span class="p">,</span>
+    <span class="s2">"</span><span class="si">{column}</span><span class="s2"> ILIKE '%Massachusetts Institute of Technology%'"</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s2">"</span><span class="si">{column}</span><span class="s2"> ~* '\yMIT\y'"</span><span class="p">,</span>
+    <span class="s2">"</span><span class="si">{column}</span><span class="s2"> ILIKE '%Stanford%'"</span><span class="p">,</span>
+    <span class="s2">"</span><span class="si">{column}</span><span class="s2"> ILIKE '%Carnegie Mellon%'"</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s2">"</span><span class="si">{column}</span><span class="s2"> ~* '\yCMU\y'"</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_university_filter</span><span class="p">(</span><span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the SQL that restricts ``column`` to :data:`_TARGET_UNIVERSITIES`."""</span>
+    <span class="k">return</span> <span class="s2">"("</span> <span class="o">+</span> <span class="s2">" OR "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">clause</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="n">column</span><span class="p">)</span> <span class="k">for</span> <span class="n">clause</span> <span class="ow">in</span> <span class="n">_TARGET_UNIVERSITIES</span><span class="p">)</span> <span class="o">+</span> <span class="s2">")"</span>
+
 <span class="n">ANALYSIS_SPECS</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">AnalysisSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">AnalysisSpec</span><span class="p">(</span>
         <span class="s2">"total_applicants"</span><span class="p">,</span>
@@ -210,24 +230,28 @@
     <span class="p">),</span>
     <span class="n">AnalysisSpec</span><span class="p">(</span>
         <span class="s2">"fall_2026_phd_cs_acceptances"</span><span class="p">,</span>
-        <span class="s2">"How many 2026 PhD Computer Science acceptances are there (original fields)?"</span><span class="p">,</span>
+        <span class="s2">"How many 2026 PhD Computer Science acceptances are there at Georgetown, "</span>
+        <span class="s2">"MIT, Stanford or Carnegie Mellon (original fields)?"</span><span class="p">,</span>
         <span class="s2">"count"</span><span class="p">,</span>
         <span class="sa">f</span><span class="s2">"""</span>
 <span class="s2">        SELECT COUNT(*) FROM applicants</span>
 <span class="s2">        WHERE term ILIKE '%2026%' AND </span><span class="si">{</span><span class="n">_ACCEPTED</span><span class="si">}</span>
 <span class="s2">          AND (degree ILIKE '%phd%' OR degree ILIKE '%ph.d%')</span>
-<span class="s2">          AND program ILIKE '%Computer Science%';</span>
+<span class="s2">          AND program ILIKE '%Computer Science%'</span>
+<span class="s2">          AND </span><span class="si">{</span><span class="n">_university_filter</span><span class="p">(</span><span class="s1">'program'</span><span class="p">)</span><span class="si">}</span><span class="s2">;</span>
 <span class="s2">        """</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="n">AnalysisSpec</span><span class="p">(</span>
         <span class="s2">"llm_fall_2026_phd_cs_acceptances"</span><span class="p">,</span>
-        <span class="s2">"How many 2026 PhD Computer Science acceptances are there (LLM-standardised fields)?"</span><span class="p">,</span>
+        <span class="s2">"How many 2026 PhD Computer Science acceptances are there at Georgetown, "</span>
+        <span class="s2">"MIT, Stanford or Carnegie Mellon (LLM-standardised fields)?"</span><span class="p">,</span>
         <span class="s2">"count"</span><span class="p">,</span>
         <span class="sa">f</span><span class="s2">"""</span>
 <span class="s2">        SELECT COUNT(*) FROM applicants</span>
 <span class="s2">        WHERE term ILIKE '%2026%' AND </span><span class="si">{</span><span class="n">_ACCEPTED</span><span class="si">}</span>
 <span class="s2">          AND (degree ILIKE '%phd%' OR degree ILIKE '%ph.d%')</span>
-<span class="s2">          AND llm_generated_program ILIKE '%Computer Science%';</span>
+<span class="s2">          AND llm_generated_program ILIKE '%Computer Science%'</span>
+<span class="s2">          AND </span><span class="si">{</span><span class="n">_university_filter</span><span class="p">(</span><span class="s1">'llm_generated_university'</span><span class="p">)</span><span class="si">}</span><span class="s2">;</span>
 <span class="s2">        """</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="n">AnalysisSpec</span><span class="p">(</span>

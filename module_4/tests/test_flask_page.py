@@ -7,6 +7,8 @@ from __future__ import annotations
 import pytest
 from bs4 import BeautifulSoup
 
+import psycopg
+
 from helpers import Recorder
 from src import flask_app, query_data
 
@@ -178,3 +180,41 @@ def test_service_accessors_resolve_against_the_active_app(stub_app):
     with stub_app.test_request_context("/analysis"):
         assert flask_app.get_services() is stub_app.extensions[flask_app.EXTENSION_KEY]
         assert flask_app.get_state() is stub_app.extensions[flask_app.EXTENSION_KEY]["state"]
+
+
+def test_analysis_page_degrades_when_the_database_is_unreachable(make_app, stub_services):
+    """A dead database yields a usable page with a banner, never a 500."""
+    stub_services["analysis_provider"] = Recorder(
+        error=psycopg.OperationalError("connection refused")
+    )
+    app = make_app(**stub_services)
+
+    response = app.test_client().get("/analysis")
+    page = soup_of(response)
+
+    assert response.status_code == 200
+    banner = page.find(attrs={"data-testid": "db-error"})
+    assert banner is not None
+    assert "PostgreSQL is running" in banner.get_text()
+
+    # The page is still usable: both buttons and every question are present.
+    assert page.find(attrs={"data-testid": flask_app.PULL_BUTTON_TESTID}) is not None
+    assert page.find(attrs={"data-testid": flask_app.UPDATE_BUTTON_TESTID}) is not None
+    assert len(page.find_all(attrs={"data-testid": "analysis-item"})) == len(
+        query_data.EXPECTED_KEYS
+    )
+
+
+def test_analysis_page_degrades_against_a_real_dead_database(make_app):
+    """The same path, driven by an unreachable DATABASE_URL rather than a double."""
+    app = make_app(config={"DATABASE_URL": "postgresql://localhost:9999/nope"})
+
+    response = app.test_client().get("/analysis")
+
+    assert response.status_code == 200
+    assert soup_of(response).find(attrs={"data-testid": "db-error"}) is not None
+
+
+def test_a_healthy_page_shows_no_database_banner(stub_client):
+    """The banner appears only when the database is actually unreachable."""
+    assert soup_of(stub_client.get("/analysis")).find(attrs={"data-testid": "db-error"}) is None

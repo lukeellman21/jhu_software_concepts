@@ -20,6 +20,23 @@ _ACCEPTED = or_(
 )
 
 
+def _at_target_university(column):
+    r"""Restrict ``column`` to the universities questions 8 and 9 ask about.
+
+    Full names use ``ILIKE``; the abbreviations use PostgreSQL's ``~*`` with the
+    ``\y`` word boundary so that ``MIT`` does not match the "mit" inside
+    "Smith College".
+    """
+    return or_(
+        column.ilike("%Georgetown%"),
+        column.ilike("%Massachusetts Institute of Technology%"),
+        column.op("~*")(r"\yMIT\y"),
+        column.ilike("%Stanford%"),
+        column.ilike("%Carnegie Mellon%"),
+        column.op("~*")(r"\yCMU\y"),
+    )
+
+
 def _percent(part: int, whole: int) -> float:
     """Return ``part / whole`` as a percentage, guarding against division by zero."""
     return (part * 100.0 / whole) if whole else 0.0
@@ -75,6 +92,7 @@ def run_orm_queries(
                 _ACCEPTED,
                 Applicant.degree.ilike("%phd%"),
                 Applicant.program.ilike("%Computer Science%"),
+                _at_target_university(Applicant.program),
             )
         )
     ).scalar_one()
@@ -86,6 +104,7 @@ def run_orm_queries(
                 _ACCEPTED,
                 Applicant.degree.ilike("%phd%"),
                 Applicant.llm_generated_program.ilike("%Computer Science%"),
+                _at_target_university(Applicant.llm_generated_university),
             )
         )
     ).scalar_one()

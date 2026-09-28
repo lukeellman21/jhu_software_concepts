@@ -9,6 +9,8 @@ from __future__ import annotations
 import pytest
 from bs4 import BeautifulSoup
 
+import psycopg
+
 from helpers import Recorder
 from src import flask_app
 
@@ -165,6 +167,22 @@ def test_pull_data_returns_202_for_a_background_runner(make_app, stub_services, 
     assert threads[0].is_alive() is False
     assert state.busy is False
     assert state.rows_loaded == len(records)
+
+
+def test_update_analysis_reports_an_unreachable_database(make_app, stub_services):
+    """A dead database gives a structured 503 rather than an unhandled traceback."""
+    stub_services["analysis_provider"] = Recorder(
+        error=psycopg.OperationalError("connection refused")
+    )
+    app = make_app(**stub_services)
+    state = app.extensions[flask_app.EXTENSION_KEY]["state"]
+
+    response = app.test_client().post("/update-analysis")
+
+    assert response.status_code == 503
+    assert response.get_json()["ok"] is False
+    assert "connection refused" in response.get_json()["error"]
+    assert state.analysis is None
 
 
 def test_run_sync_executes_the_job_inline():

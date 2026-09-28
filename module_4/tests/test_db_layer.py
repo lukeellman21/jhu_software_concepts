@@ -104,8 +104,10 @@ class TestOrmReport:
         assert results["fall_2026_count"] == 2
         assert results["avg_gpa_american_fall_2026"] == pytest.approx(3.95, abs=0.01)
         assert results["fall_2025_acceptance_percent"] == pytest.approx(0.0)
-        assert results["fall_2026_phd_cs_acceptances"] == 2
-        assert results["llm_fall_2026_phd_cs_acceptances"] == 2
+        # The fixture holds a JHU and a Stanford PhD CS acceptance; only
+        # Stanford is one of the universities questions 8 and 9 ask about.
+        assert results["fall_2026_phd_cs_acceptances"] == 1
+        assert results["llm_fall_2026_phd_cs_acceptances"] == 1
         assert results["acceptance_percent_high_gpa"] == pytest.approx(100.0)
 
     def test_report_prints_formatted_answers(self, conn, database_url, records, capsys):

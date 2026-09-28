@@ -75,7 +75,7 @@ Create the databases
 Load some data
 --------------
 
-A 60-record sample dataset ships with the repository so that nothing needs the
+A 20-record sample dataset ships with the repository so that nothing needs the
 network to get started:
 
 .. code-block:: bash

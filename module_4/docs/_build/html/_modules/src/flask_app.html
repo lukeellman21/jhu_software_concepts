@@ -107,6 +107,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">psycopg</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">current_app</span><span class="p">,</span> <span class="n">jsonify</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">url_for</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">db</span><span class="p">,</span> <span class="n">load_data</span><span class="p">,</span> <span class="n">query_data</span><span class="p">,</span> <span class="n">scrape</span>
@@ -118,6 +119,13 @@
 <span class="c1">#: ``templates/analysis.html`` (the page tests fail if they drift apart).</span>
 <span class="n">PULL_BUTTON_TESTID</span> <span class="o">=</span> <span class="s2">"pull-data-btn"</span>
 <span class="n">UPDATE_BUTTON_TESTID</span> <span class="o">=</span> <span class="s2">"update-analysis-btn"</span>
+
+<span class="c1">#: Shown on the page when PostgreSQL cannot be reached, instead of a 500.</span>
+<span class="n">DATABASE_UNAVAILABLE_MESSAGE</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"The analysis database is unreachable, so the answers below are unavailable. "</span>
+    <span class="s2">"Check that PostgreSQL is running (`pg_isready`) and that DATABASE_URL points "</span>
+    <span class="s2">"at an existing database, then reload this page."</span>
+<span class="p">)</span>
 
 <span class="n">bp</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s2">"gradcafe"</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
 
@@ -256,18 +264,31 @@
 <span class="sd">    The page renders the cached analysis snapshot, computing one on first visit</span>
 <span class="sd">    so a fresh application is never blank.  ``POST /update-analysis`` refreshes</span>
 <span class="sd">    the snapshot.</span>
+
+<span class="sd">    If PostgreSQL cannot be reached the page still renders, with every answer</span>
+<span class="sd">    blank and a banner explaining the problem, rather than failing with a 500.</span>
 <span class="sd">    """</span>
     <span class="n">services</span> <span class="o">=</span> <span class="n">get_services</span><span class="p">()</span>
     <span class="n">state</span> <span class="o">=</span> <span class="n">services</span><span class="p">[</span><span class="s2">"state"</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">analysis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">state</span><span class="o">.</span><span class="n">record_analysis</span><span class="p">(</span><span class="n">services</span><span class="p">[</span><span class="s2">"analysis"</span><span class="p">]())</span>
+    <span class="n">database_error</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">analysis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">record_analysis</span><span class="p">(</span><span class="n">services</span><span class="p">[</span><span class="s2">"analysis"</span><span class="p">]())</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">services</span><span class="p">[</span><span class="s2">"rows"</span><span class="p">]()</span>
+    <span class="k">except</span> <span class="n">psycopg</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">current_app</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"Analysis page degraded: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="n">database_error</span> <span class="o">=</span> <span class="n">DATABASE_UNAVAILABLE_MESSAGE</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">analysis</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">analysis</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
         <span class="s2">"analysis.html"</span><span class="p">,</span>
-        <span class="n">items</span><span class="o">=</span><span class="n">query_data</span><span class="o">.</span><span class="n">get_analysis_items</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">analysis</span><span class="p">),</span>
-        <span class="n">analysis</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">analysis</span><span class="p">,</span>
-        <span class="n">rows</span><span class="o">=</span><span class="n">services</span><span class="p">[</span><span class="s2">"rows"</span><span class="p">](),</span>
+        <span class="n">items</span><span class="o">=</span><span class="n">query_data</span><span class="o">.</span><span class="n">get_analysis_items</span><span class="p">(</span><span class="n">analysis</span><span class="p">),</span>
+        <span class="n">analysis</span><span class="o">=</span><span class="n">analysis</span><span class="p">,</span>
+        <span class="n">rows</span><span class="o">=</span><span class="n">rows</span><span class="p">,</span>
         <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(),</span>
+        <span class="n">database_error</span><span class="o">=</span><span class="n">database_error</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
@@ -327,7 +348,11 @@
     <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">busy</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">"ok"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">"busy"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"message"</span><span class="p">:</span> <span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="p">}),</span> <span class="mi">409</span>
 
-    <span class="n">state</span><span class="o">.</span><span class="n">record_analysis</span><span class="p">(</span><span class="n">services</span><span class="p">[</span><span class="s2">"analysis"</span><span class="p">]())</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">record_analysis</span><span class="p">(</span><span class="n">services</span><span class="p">[</span><span class="s2">"analysis"</span><span class="p">]())</span>
+    <span class="k">except</span> <span class="n">psycopg</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">"ok"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">"busy"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">"error"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)}),</span> <span class="mi">503</span>
+
     <span class="k">return</span> <span class="p">(</span>
         <span class="n">jsonify</span><span class="p">(</span>
             <span class="p">{</span>

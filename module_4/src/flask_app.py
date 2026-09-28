@@ -31,6 +31,7 @@ from datetime import datetime, timezone
 from functools import partial
 from typing import Any, Callable, Dict, List, Optional
 
+import psycopg
 from flask import Blueprint, Flask, current_app, jsonify, redirect, render_template, url_for
 
 from . import db, load_data, query_data, scrape
@@ -42,6 +43,13 @@ EXTENSION_KEY = "gradcafe"
 #: ``templates/analysis.html`` (the page tests fail if they drift apart).
 PULL_BUTTON_TESTID = "pull-data-btn"
 UPDATE_BUTTON_TESTID = "update-analysis-btn"
+
+#: Shown on the page when PostgreSQL cannot be reached, instead of a 500.
+DATABASE_UNAVAILABLE_MESSAGE = (
+    "The analysis database is unreachable, so the answers below are unavailable. "
+    "Check that PostgreSQL is running (`pg_isready`) and that DATABASE_URL points "
+    "at an existing database, then reload this page."
+)
 
 bp = Blueprint("gradcafe", __name__)
 
@@ -145,18 +153,31 @@ def analysis_page():
     The page renders the cached analysis snapshot, computing one on first visit
     so a fresh application is never blank.  ``POST /update-analysis`` refreshes
     the snapshot.
+
+    If PostgreSQL cannot be reached the page still renders, with every answer
+    blank and a banner explaining the problem, rather than failing with a 500.
     """
     services = get_services()
     state = services["state"]
-    if state.analysis is None:
-        state.record_analysis(services["analysis"]())
+    database_error = None
 
+    try:
+        if state.analysis is None:
+            state.record_analysis(services["analysis"]())
+        rows = services["rows"]()
+    except psycopg.OperationalError as exc:
+        current_app.logger.warning("Analysis page degraded: %s", exc)
+        database_error = DATABASE_UNAVAILABLE_MESSAGE
+        rows = []
+
+    analysis = state.analysis or {}
     return render_template(
         "analysis.html",
-        items=query_data.get_analysis_items(state.analysis),
-        analysis=state.analysis,
-        rows=services["rows"](),
+        items=query_data.get_analysis_items(analysis),
+        analysis=analysis,
+        rows=rows,
         state=state.snapshot(),
+        database_error=database_error,
     )
 
 
@@ -210,7 +231,11 @@ def update_analysis():
     if state.busy:
         return jsonify({"ok": False, "busy": True, "message": state.message}), 409
 
-    state.record_analysis(services["analysis"]())
+    try:
+        state.record_analysis(services["analysis"]())
+    except psycopg.OperationalError as exc:
+        return jsonify({"ok": False, "busy": False, "error": str(exc)}), 503
+
     return (
         jsonify(
             {

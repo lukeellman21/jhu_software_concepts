@@ -217,10 +217,64 @@ def test_read_records_defaults_to_the_bundled_dataset(monkeypatch):
 
 
 def test_loader_cli_loads_and_reports(conn, capsys):
-    """``python -m src.load_data --reset`` loads the sample data and says how many."""
-    inserted = load_data.main(["--reset"])
+    """``python -m src.load_data --reset`` loads the sample data and exits zero."""
+    exit_code = load_data.main(["--reset"])
     out = capsys.readouterr().out
+    loaded = query_data.count_rows(conn=conn)
 
-    assert inserted > 0
-    assert f"Inserted {inserted} new row(s)" in out
-    assert query_data.count_rows(conn=conn) == inserted
+    assert exit_code == 0
+    assert loaded > 0
+    assert f"Inserted {loaded} new row(s)" in out
+
+
+def test_loader_cli_fails_cleanly_when_the_database_is_unreachable(monkeypatch, capsys):
+    """An unreachable database gives guidance and a non-zero exit, not a traceback."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://localhost:9999/nope")
+
+    exit_code = load_data.main([])
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert "Could not connect to PostgreSQL" in captured.err
+    assert "pg_isready" in captured.err
+    assert "Nothing was loaded" in captured.err
+    assert captured.out == ""
+
+
+def test_the_bundled_sample_has_no_duplicate_urls():
+    """The shipped dataset is de-duplicated on its uniqueness key."""
+    records = load_data.read_records()
+    urls = [record["url"] for record in records]
+
+    assert len(urls) == len(set(urls))
+    assert len(urls) >= 20
+
+
+def test_smith_college_is_not_counted_as_mit(conn):
+    """The target-university filter matches MIT as a word, not the "mit" in Smith."""
+    rows = [
+        {
+            "url": "https://www.thegradcafe.com/result/3000001",
+            "program": "Smith College - Computer Science",
+            "term": "Fall 2026",
+            "status": "Accepted",
+            "degree": "PhD",
+            "llm_generated_university": "Smith College",
+            "llm_generated_program": "Computer Science",
+        },
+        {
+            "url": "https://www.thegradcafe.com/result/3000002",
+            "program": "MIT - Computer Science",
+            "term": "Fall 2026",
+            "status": "Accepted",
+            "degree": "PhD",
+            "llm_generated_university": "MIT",
+            "llm_generated_program": "Computer Science",
+        },
+    ]
+    load_data.insert_rows(rows, conn=conn)
+
+    analysis = query_data.get_analysis(conn=conn)
+
+    assert analysis["fall_2026_phd_cs_acceptances"] == 1
+    assert analysis["llm_fall_2026_phd_cs_acceptances"] == 1

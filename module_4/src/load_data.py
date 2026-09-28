@@ -22,6 +22,7 @@ import hashlib
 import json
 import os
 import re
+import sys
 from datetime import date, datetime
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
@@ -105,6 +106,16 @@ DEFAULT_DATA_FILE = os.path.join(
 )
 
 _DATE_FORMATS = ("%Y-%m-%d", "%m/%d/%Y", "%d-%b-%Y", "%B %d, %Y", "%b %d, %Y")
+
+#: Printed when the loader cannot reach PostgreSQL, so the operator knows what to fix.
+CONNECTION_HELP = (
+    "Could not connect to PostgreSQL at {url}.\n"
+    "  1. Is the server running?  Check with `pg_isready`.\n"
+    "  2. Does the database exist?  Create it with `createdb gradcafe`.\n"
+    "  3. Is DATABASE_URL correct?  It is read from the environment.\n"
+    "Nothing was loaded; re-run once the server is reachable.\n"
+    "Original error: {error}"
+)
 
 
 def extract_degree(text: Optional[str]) -> str:
@@ -347,16 +358,27 @@ def load_data(
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
-    """Command-line entry point: ``python -m src.load_data --reset``."""
+    """Command-line entry point: ``python -m src.load_data --reset``.
+
+    :param argv: argument list; ``None`` reads ``sys.argv``.
+    :returns: ``0`` when the load succeeded, ``1`` when the database could not
+        be reached.  ``__main__`` passes the value to :class:`SystemExit`, so a
+        failed load exits non-zero.
+    """
     parser = argparse.ArgumentParser(description="Load Grad Café records into PostgreSQL.")
     parser.add_argument("--file", dest="path", default=None, help="JSON dataset to load")
     parser.add_argument("--reset", action="store_true", help="drop and recreate the table first")
     args = parser.parse_args(argv)
 
-    inserted = load_data(path=args.path, reset=args.reset)
+    try:
+        inserted = load_data(path=args.path, reset=args.reset)
+    except psycopg.OperationalError as exc:
+        print(CONNECTION_HELP.format(url=db.get_database_url(), error=exc), file=sys.stderr)
+        return 1
+
     print(f"Inserted {inserted} new row(s) into {TABLE_NAME}.")
-    return inserted
+    return 0
 
 
 if __name__ == "__main__":  # pragma: no cover - CLI entry point
-    main()
+    raise SystemExit(main())

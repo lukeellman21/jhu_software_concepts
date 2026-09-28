@@ -55,6 +55,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#failure-handling">Failure handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#required-fields">Required fields</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#background-pulls">Background pulls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degraded-mode">Degraded mode</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
@@ -123,6 +124,10 @@ runner</p></td>
 <td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">500</span> <span class="pre">{&quot;ok&quot;:</span> <span class="pre">false,</span> <span class="pre">&quot;error&quot;:</span> <span class="pre">...}</span></code>; the batch was rolled back</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code> (database down)</p></td>
+<td><p>no</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">503</span> <span class="pre">{&quot;ok&quot;:</span> <span class="pre">false,</span> <span class="pre">&quot;error&quot;:</span> <span class="pre">...}</span></code>; the snapshot is left alone</p></td>
+</tr>
 </tbody>
 </table>
 <p>The flag is set before the job starts and cleared in both the success and the
@@ -178,6 +183,21 @@ matters.</p>
 finishes.  Passing <code class="docutils literal notranslate"><span class="pre">runner=run_in_thread</span></code> to
 <a class="reference internal" href="api.html#src.flask_app.create_app" title="src.flask_app.create_app"><code class="xref py py-func docutils literal notranslate"><span class="pre">src.flask_app.create_app()</span></code></a> moves the job to a daemon thread; the endpoint
 then answers <code class="docutils literal notranslate"><span class="pre">202</span></code> and the caller watches <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/status</span></code> for completion.</p>
+</section>
+<section id="degraded-mode">
+<h2>Degraded mode<a class="headerlink" href="#degraded-mode" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/analysis</span></code> never fails with a 500 because the database is down.  If
+<code class="xref py py-class docutils literal notranslate"><span class="pre">psycopg.OperationalError</span></code> is raised while computing the analysis or
+reading rows, the page still renders: both buttons work, every question is
+listed, the answers read <code class="docutils literal notranslate"><span class="pre">N/A</span></code> or <code class="docutils literal notranslate"><span class="pre">0</span></code>, and a banner
+(<code class="docutils literal notranslate"><span class="pre">data-testid=&quot;db-error&quot;</span></code>) explains that PostgreSQL is unreachable and how to
+check it.  <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code> answers <code class="docutils literal notranslate"><span class="pre">503</span></code> in the same situation, and
+<code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/pull-data</span></code> answers <code class="docutils literal notranslate"><span class="pre">500</span></code>, because those are real failed actions
+rather than a page that can degrade.</p>
+<p>The loader behaves the same way at the command line:
+<a class="reference internal" href="api.html#src.load_data.main" title="src.load_data.main"><code class="xref py py-func docutils literal notranslate"><span class="pre">src.load_data.main()</span></code></a> catches the connection failure, prints
+<a class="reference internal" href="api.html#src.load_data.CONNECTION_HELP" title="src.load_data.CONNECTION_HELP"><code class="xref py py-data docutils literal notranslate"><span class="pre">src.load_data.CONNECTION_HELP</span></code></a> to stderr with the three things to check,
+loads nothing, and returns <code class="docutils literal notranslate"><span class="pre">1</span></code> so the process exits non-zero.</p>
 </section>
 </section>
 

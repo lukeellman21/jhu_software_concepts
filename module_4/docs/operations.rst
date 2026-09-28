@@ -29,6 +29,9 @@ One flag, :attr:`src.flask_app.PullState.busy`, gates both POST endpoints:
    * - ``POST /pull-data`` (loader raised)
      - --
      - ``500 {"ok": false, "error": ...}``; the batch was rolled back
+   * - ``POST /update-analysis`` (database down)
+     - no
+     - ``503 {"ok": false, "error": ...}``; the snapshot is left alone
 
 The flag is set before the job starts and cleared in both the success and the
 failure path, so a failed pull cannot wedge the pipeline.  ``GET /status``
@@ -87,3 +90,21 @@ The default runner is synchronous: the response arrives after the load
 finishes.  Passing ``runner=run_in_thread`` to
 :func:`src.flask_app.create_app` moves the job to a daemon thread; the endpoint
 then answers ``202`` and the caller watches ``GET /status`` for completion.
+
+
+Degraded mode
+-------------
+
+``GET /analysis`` never fails with a 500 because the database is down.  If
+:class:`psycopg.OperationalError` is raised while computing the analysis or
+reading rows, the page still renders: both buttons work, every question is
+listed, the answers read ``N/A`` or ``0``, and a banner
+(``data-testid="db-error"``) explains that PostgreSQL is unreachable and how to
+check it.  ``POST /update-analysis`` answers ``503`` in the same situation, and
+``POST /pull-data`` answers ``500``, because those are real failed actions
+rather than a page that can degrade.
+
+The loader behaves the same way at the command line:
+:func:`src.load_data.main` catches the connection failure, prints
+:data:`src.load_data.CONNECTION_HELP` to stderr with the three things to check,
+loads nothing, and returns ``1`` so the process exits non-zero.

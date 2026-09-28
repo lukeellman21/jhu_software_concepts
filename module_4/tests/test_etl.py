@@ -367,8 +367,16 @@ class TestClean:
         assert cleaned["GRE"] == 167
         assert cleaned["GRE AW"] == 4.5
 
-    def test_clean_records_processes_the_batch(self):
-        assert len(clean.clean_records(raw_records())) == len(raw_records())
+    def test_clean_data_processes_the_batch(self):
+        cleaned = clean.clean_data(raw_records())
+
+        assert len(cleaned) == len(raw_records())
+        assert set(cleaned[0]) == set(clean.CLEAN_KEYS)
+
+    def test_clean_records_is_an_alias_for_clean_data(self):
+        """The documented entry point is ``clean_data``; the old name still works."""
+        assert clean.clean_records is clean.clean_data
+        assert clean.clean_records(raw_records()) == clean.clean_data(raw_records())
 
     def test_clean_file_round_trip(self, tmp_path):
         source = tmp_path / "raw.json"

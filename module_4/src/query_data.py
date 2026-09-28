@@ -33,6 +33,26 @@ class AnalysisSpec(NamedTuple):
 
 _ACCEPTED = "(status ILIKE '%accepted%' OR status ILIKE '%acceptance%')"
 
+#: The universities Module 3's questions 8 and 9 ask about.
+#:
+#: Full names are matched with ``ILIKE``; the abbreviations use the PostgreSQL
+#: word-boundary operator ``~*`` with ``\y`` so that ``MIT`` matches "MIT" but
+#: not the "mit" inside "Smith College", which is what made the Module-3
+#: counts too high.
+_TARGET_UNIVERSITIES = (
+    "{column} ILIKE '%Georgetown%'",
+    "{column} ILIKE '%Massachusetts Institute of Technology%'",
+    r"{column} ~* '\yMIT\y'",
+    "{column} ILIKE '%Stanford%'",
+    "{column} ILIKE '%Carnegie Mellon%'",
+    r"{column} ~* '\yCMU\y'",
+)
+
+
+def _university_filter(column: str) -> str:
+    """Return the SQL that restricts ``column`` to :data:`_TARGET_UNIVERSITIES`."""
+    return "(" + " OR ".join(clause.format(column=column) for clause in _TARGET_UNIVERSITIES) + ")"
+
 ANALYSIS_SPECS: Sequence[AnalysisSpec] = (
     AnalysisSpec(
         "total_applicants",
@@ -131,24 +151,28 @@ ANALYSIS_SPECS: Sequence[AnalysisSpec] = (
     ),
     AnalysisSpec(
         "fall_2026_phd_cs_acceptances",
-        "How many 2026 PhD Computer Science acceptances are there (original fields)?",
+        "How many 2026 PhD Computer Science acceptances are there at Georgetown, "
+        "MIT, Stanford or Carnegie Mellon (original fields)?",
         "count",
         f"""
         SELECT COUNT(*) FROM applicants
         WHERE term ILIKE '%2026%' AND {_ACCEPTED}
           AND (degree ILIKE '%phd%' OR degree ILIKE '%ph.d%')
-          AND program ILIKE '%Computer Science%';
+          AND program ILIKE '%Computer Science%'
+          AND {_university_filter('program')};
         """,
     ),
     AnalysisSpec(
         "llm_fall_2026_phd_cs_acceptances",
-        "How many 2026 PhD Computer Science acceptances are there (LLM-standardised fields)?",
+        "How many 2026 PhD Computer Science acceptances are there at Georgetown, "
+        "MIT, Stanford or Carnegie Mellon (LLM-standardised fields)?",
         "count",
         f"""
         SELECT COUNT(*) FROM applicants
         WHERE term ILIKE '%2026%' AND {_ACCEPTED}
           AND (degree ILIKE '%phd%' OR degree ILIKE '%ph.d%')
-          AND llm_generated_program ILIKE '%Computer Science%';
+          AND llm_generated_program ILIKE '%Computer Science%'
+          AND {_university_filter('llm_generated_university')};
         """,
     ),
     AnalysisSpec(

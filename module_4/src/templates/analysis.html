@@ -47,6 +47,10 @@
             </div>
         </section>
 
+        {% if database_error %}
+        <div class="alert alert-error" data-testid="db-error">{{ database_error }}</div>
+        {% endif %}
+
         {% if state.error %}
         <div class="alert" data-testid="pull-error">Last pull failed: {{ state.error }}</div>
         {% endif %}

@@ -25,7 +25,7 @@ module_4/
 │   └── static/          # style.css
 ├── tests/               # all test code
 ├── docs/                # Sphinx project (source + conf.py + built HTML)
-├── data/                # 60-record sample dataset, so nothing needs the network
+├── data/                # 20-record sample dataset, so nothing needs the network
 ├── pytest.ini
 ├── requirements.txt
 ├── coverage_summary.txt
@@ -137,4 +137,6 @@ uniqueness keys) and troubleshooting.
 - `p_id` is now derived from the Grad Café result URL, which is what makes
   repeated pulls idempotent.
 - The 12 MB scraped datasets stay in `module_3/`; `module_4/data/` carries a
-  60-record sample so the loader and the tests never need the network.
+  20-record sample of the distinct entries, so the loader and the tests
+  never need the network. The Module-2 scrape recorded 30,000 rows but only 20
+  distinct result URLs, so the sample is de-duplicated on `url`.
