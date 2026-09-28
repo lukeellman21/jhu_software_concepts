@@ -5,7 +5,7 @@ analysis page backed by a PostgreSQL database, an ETL pipeline that fills it,
 203 marked tests at 100% coverage, and Sphinx documentation.
 
 - **Documentation:** https://jhu-software-concepts.readthedocs.io/
-- **CI:** [`.github/workflows/tests.yml`](../.github/workflows/tests.yml) — starts PostgreSQL 16 and runs the full suite with coverage (see `actions_success.png`)
+- **CI:** [`.github/workflows/tests.yml`](../.github/workflows/tests.yml): starts PostgreSQL 16 and runs the full suite with coverage (see `actions_success.png`)
 - **Coverage proof:** [`coverage_summary.txt`](coverage_summary.txt)
 
 ## Layout
@@ -94,7 +94,7 @@ run enforces 100% coverage of `module_4/src`; the committed summary is in
 `coverage_summary.txt`.
 
 Every test carries one of the markers `web`, `buttons`, `analysis`, `db` or
-`integration` — there are no unmarked tests. No test reaches the network, opens
+`integration`, and there are no unmarked tests. No test reaches the network, opens
 a browser, or sleeps waiting on the busy flag.
 
 | File | Marker | Covers |
