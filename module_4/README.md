@@ -2,10 +2,10 @@
 
 A test-driven, documented version of the Grad Café analytics service: a Flask
 analysis page backed by a PostgreSQL database, an ETL pipeline that fills it,
-203 marked tests at 100% coverage, and Sphinx documentation.
+211 marked tests at 100% coverage, and Sphinx documentation.
 
 - **Documentation:** https://lukeellman-jhu-software-concepts.readthedocs.io/en/latest/
-- **CI:** [`.github/workflows/tests.yml`](../.github/workflows/tests.yml): starts PostgreSQL 16 and runs the full suite with coverage (see `actions_success.png`)
+- **CI:** [`.github/workflows/tests.yml`](../.github/workflows/tests.yml): starts PostgreSQL 16 and runs the full suite with coverage (see [`actions_success.png`](actions_success.png))
 - **Coverage proof:** [`coverage_summary.txt`](coverage_summary.txt)
 
 ## Layout
@@ -26,9 +26,11 @@ module_4/
 ├── tests/               # all test code
 ├── docs/                # Sphinx project (source + conf.py + built HTML)
 ├── data/                # 20-record sample dataset, so nothing needs the network
+├── conftest.py          # puts module_4 on sys.path for `import src`
 ├── pytest.ini
 ├── requirements.txt
 ├── coverage_summary.txt
+├── actions_success.png  # green CI run
 └── README.md
 ```
 
@@ -74,9 +76,9 @@ Open <http://127.0.0.1:5000/analysis> (`/` redirects there).
 | Route | Method | Behaviour |
 | --- | --- | --- |
 | `/` | GET | redirect to `/analysis` |
-| `/analysis` | GET | the analysis page: both buttons, one `Answer:` per question |
+| `/analysis` | GET | the analysis page: both buttons, one `Answer:` per question. Always `200`: if PostgreSQL is unreachable the page still renders, with a `data-testid="db-error"` banner instead of a 500 |
 | `/pull-data` | POST | `200 {"ok": true, "rows_loaded": n}`; `409 {"busy": true}` while a pull runs; `500` if the loader fails |
-| `/update-analysis` | POST | `200 {"ok": true}`; `409 {"busy": true}` while a pull runs |
+| `/update-analysis` | POST | `200 {"ok": true}`; `409 {"busy": true}` while a pull runs; `503` if PostgreSQL is unreachable |
 | `/status` | GET | JSON snapshot of the pipeline state |
 
 ## Run the tests
