@@ -12,7 +12,8 @@ __pycache__/
 .pytest_cache/
 .coverage
 htmlcov/
-module_4/docs/_build/doctrees/
+# Sphinx writes its incremental build cache inside the html output dir.
+module_4/docs/_build/html/.doctrees/
 .env
 .env.*
 *.env
