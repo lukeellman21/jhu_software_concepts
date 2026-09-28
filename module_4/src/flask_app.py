@@ -38,7 +38,8 @@ from . import db, load_data, query_data, scrape
 #: Key under which the service bundle is stored in ``app.extensions``.
 EXTENSION_KEY = "gradcafe"
 
-#: ``data-testid`` values the UI tests rely on.
+#: ``data-testid`` values the UI tests rely on; they must match the literals in
+#: ``templates/analysis.html`` (the page tests fail if they drift apart).
 PULL_BUTTON_TESTID = "pull-data-btn"
 UPDATE_BUTTON_TESTID = "update-analysis-btn"
 
@@ -156,8 +157,6 @@ def analysis_page():
         analysis=state.analysis,
         rows=services["rows"](),
         state=state.snapshot(),
-        pull_testid=PULL_BUTTON_TESTID,
-        update_testid=UPDATE_BUTTON_TESTID,
     )
 
 

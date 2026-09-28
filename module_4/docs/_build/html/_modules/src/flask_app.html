@@ -114,7 +114,8 @@
 <span class="c1">#: Key under which the service bundle is stored in ``app.extensions``.</span>
 <span class="n">EXTENSION_KEY</span> <span class="o">=</span> <span class="s2">"gradcafe"</span>
 
-<span class="c1">#: ``data-testid`` values the UI tests rely on.</span>
+<span class="c1">#: ``data-testid`` values the UI tests rely on; they must match the literals in</span>
+<span class="c1">#: ``templates/analysis.html`` (the page tests fail if they drift apart).</span>
 <span class="n">PULL_BUTTON_TESTID</span> <span class="o">=</span> <span class="s2">"pull-data-btn"</span>
 <span class="n">UPDATE_BUTTON_TESTID</span> <span class="o">=</span> <span class="s2">"update-analysis-btn"</span>
 
@@ -267,8 +268,6 @@
         <span class="n">analysis</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">analysis</span><span class="p">,</span>
         <span class="n">rows</span><span class="o">=</span><span class="n">services</span><span class="p">[</span><span class="s2">"rows"</span><span class="p">](),</span>
         <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(),</span>
-        <span class="n">pull_testid</span><span class="o">=</span><span class="n">PULL_BUTTON_TESTID</span><span class="p">,</span>
-        <span class="n">update_testid</span><span class="o">=</span><span class="n">UPDATE_BUTTON_TESTID</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
