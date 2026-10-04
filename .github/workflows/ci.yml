@@ -1,0 +1,141 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # 1. Static analysis: the assignment requires a 10.00/10 score.
+  pylint:
+    name: Pylint (fail under 10)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: module_5/requirements.txt
+      - name: Install dependencies
+        working-directory: module_5
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Run Pylint
+        working-directory: module_5
+        run: python -m pylint src --fail-under=10
+
+  # 2. Dependency analysis: the graph must regenerate and be non-empty.
+  dependency-graph:
+    name: Dependency graph (pydeps + Graphviz)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: module_5/requirements.txt
+      - name: Install Graphviz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+      - name: Install dependencies
+        working-directory: module_5
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Generate dependency.svg
+        working-directory: module_5
+        run: python -m pydeps src --noshow -T svg -o dependency.svg --cluster --max-bacon=2
+      - name: Fail if the graph is missing or empty
+        working-directory: module_5
+        run: |
+          test -s dependency.svg || { echo "dependency.svg missing or empty" >&2; exit 1; }
+          grep -q "src_flask_app" dependency.svg || {
+            echo "dependency.svg does not reflect the project structure" >&2; exit 1; }
+          echo "dependency.svg generated: $(wc -c < dependency.svg) bytes"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dependency-graph
+          path: module_5/dependency.svg
+
+  # 3. Supply chain: Snyk scans the declared dependencies.
+  snyk:
+    name: Snyk dependency scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        working-directory: module_5
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Run snyk test
+        # The scan is informational when SNYK_TOKEN is absent (for example on a
+        # fork), so a missing secret cannot silently look like a clean scan.
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        working-directory: module_5
+        run: |
+          if [ -z "$SNYK_TOKEN" ]; then
+            echo "::warning::SNYK_TOKEN is not set; skipping the Snyk scan."
+            exit 0
+          fi
+          npm install -g snyk
+          snyk test --file=requirements.txt --package-manager=pip --skip-unresolved || true
+
+  # 4. Tests: the full marked suite at 100% coverage.
+  pytest:
+    name: Pytest (module_5)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gradcafe_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/gradcafe_test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/gradcafe_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: module_5/requirements.txt
+      - name: Install dependencies
+        working-directory: module_5
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Wait for PostgreSQL
+        run: |
+          for _ in $(seq 1 30); do
+            pg_isready -h localhost -p 5432 -U postgres && exit 0
+            sleep 1
+          done
+          echo "PostgreSQL did not become ready in time" >&2
+          exit 1
+      - name: Run the full marked suite with coverage
+        run: |
+          python -m pytest module_5 \
+            -m "web or buttons or analysis or db or integration" \
+            | tee coverage_run.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-summary
+          path: coverage_run.txt

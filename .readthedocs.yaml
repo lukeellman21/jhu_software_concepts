@@ -8,11 +8,11 @@ build:
     python: "3.12"
 
 sphinx:
-  configuration: module_4/docs/conf.py
+  configuration: module_5/docs/conf.py
 
 python:
   install:
-    - requirements: module_4/requirements.txt
+    - requirements: module_5/requirements.txt
 
 formats:
   - htmlzip

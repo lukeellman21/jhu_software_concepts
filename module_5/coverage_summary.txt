@@ -1,0 +1,26 @@
+$ pytest module_5 -m "web or buttons or analysis or db or integration"
+
+........................................................................ [ 24%]
+........................................................................ [ 49%]
+........................................................................ [ 74%]
+........................................................................ [ 98%]
+...                                                                      [100%]
+================================ tests coverage ================================
+_______________ coverage: platform darwin, python 3.14.6-final-0 _______________
+
+Name                          Stmts   Miss  Cover   Missing
+-----------------------------------------------------------
+module_5/src/__init__.py          1      0   100%
+module_5/src/clean.py            66      0   100%
+module_5/src/db.py               35      0   100%
+module_5/src/fields.py            3      0   100%
+module_5/src/flask_app.py       126      0   100%
+module_5/src/load_data.py       156      0   100%
+module_5/src/models.py           39      0   100%
+module_5/src/orm_queries.py      36      0   100%
+module_5/src/query_data.py      140      0   100%
+module_5/src/scrape.py          141      0   100%
+-----------------------------------------------------------
+TOTAL                           743      0   100%
+Required test coverage of 100% reached. Total coverage: 100.00%
+291 passed in 1.38s

@@ -13,9 +13,14 @@ __pycache__/
 .coverage
 htmlcov/
 # Sphinx writes its incremental build cache inside the html output dir.
-module_4/docs/_build/html/.doctrees/
+*/docs/_build/html/.doctrees/
+# Module 5 docs are built by Read the Docs; no need to commit the HTML.
+module_5/docs/_build/
 .env
 .env.*
 *.env
 .coverage.*
 coverage.xml
+*.egg-info/
+build/
+dist/

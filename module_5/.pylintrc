@@ -1,0 +1,24 @@
+# Pylint configuration for module_5/src.
+#
+# Run with:  pylint src
+# The three settings below are the only deviations from Pylint's defaults, and
+# each exists to silence a false positive rather than a real finding.
+
+[TYPECHECK]
+# SQLAlchemy builds func.<name> dynamically at runtime, and Selenium exposes
+# webdriver.Chrome through a lazy module __getattr__. Pylint's static analysis
+# cannot see either, so both are reported as not-callable (E1102) even though
+# they are callable. Declaring them as generated members silences only that.
+generated-members=func.*,webdriver.*
+
+[DESIGN]
+# get_recent_rows takes limit, sort_by, descending, search, conn and
+# database_url. All but the first are keyword-only, so the readability problem
+# max-args guards against does not arise.
+max-args=6
+
+[SIMILARITIES]
+# src/fields.py and src/load_data.py both list the Grad Cafe field names, which
+# share six short strings ("program", "comments", "url", ...). That is shared
+# domain vocabulary, not duplicated logic, so the threshold is raised above it.
+min-similarity-lines=8

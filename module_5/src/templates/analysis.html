@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grad Café Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1>Grad Café Admissions Analysis</h1>
+            <p class="subtitle">Flask &middot; PostgreSQL &middot; SQLAlchemy</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="control-panel">
+            <div class="action-card">
+                <div>
+                    <h3>Pull Data</h3>
+                    <p class="status-indicator" data-testid="pull-status">{{ state.message }}</p>
+                </div>
+                <form id="pull-data-form" action="{{ url_for('gradcafe.pull_data') }}" method="POST">
+                    <button type="submit"
+                            class="btn btn-primary"
+                            id="pull-data-btn"
+                            data-testid="pull-data-btn"
+                            {% if state.busy %}disabled{% endif %}>Pull Data</button>
+                </form>
+            </div>
+
+            <div class="action-card">
+                <div>
+                    <h3>Update Analysis</h3>
+                    <p class="status-indicator" data-testid="analysis-status">
+                        Last updated: {{ state.last_analysis_at or 'never' }}
+                    </p>
+                </div>
+                <form id="update-analysis-form" action="{{ url_for('gradcafe.update_analysis') }}" method="POST">
+                    <button type="submit"
+                            class="btn btn-secondary"
+                            id="update-analysis-btn"
+                            data-testid="update-analysis-btn"
+                            {% if state.busy %}disabled{% endif %}>Update Analysis</button>
+                </form>
+            </div>
+        </section>
+
+        {% if database_error %}
+        <div class="alert alert-error" data-testid="db-error">{{ database_error }}</div>
+        {% endif %}
+
+        {% if state.error %}
+        <div class="alert" data-testid="pull-error">Last pull failed: {{ state.error }}</div>
+        {% endif %}
+
+        <section class="card analysis-panel">
+            <h2>Analysis</h2>
+            <ul class="analysis-list" data-testid="analysis-list">
+                {% for item in items %}
+                <li class="analysis-item" data-testid="analysis-item" data-key="{{ item.key }}">
+                    <p class="question">{{ item.question }}</p>
+                    <p class="answer" data-testid="analysis-answer">Answer: {{ item.answer }}</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="card table-container">
+            <div class="table-header">
+                <h2>Most Recently Loaded Entries</h2>
+                <form method="GET" action="{{ url_for('gradcafe.analysis_page') }}" class="search-box">
+                    <input type="text" name="q" value="{{ options.search }}"
+                           data-testid="row-search" placeholder="Search program, status, term, degree...">
+                    <select name="sort" data-testid="row-sort">
+                        {% for column in sortable %}
+                        <option value="{{ column }}" {% if column == options.sort_by %}selected{% endif %}>{{ column }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="number" name="limit" min="1" max="{{ max_limit }}"
+                           value="{{ options.limit }}" data-testid="row-limit">
+                    <button type="submit" class="btn btn-small">Search</button>
+                    {% if options.search %}
+                    <a href="{{ url_for('gradcafe.analysis_page') }}" class="btn btn-small btn-clear">Clear</a>
+                    {% endif %}
+                </form>
+            </div>
+            <table class="data-table" data-testid="recent-rows">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Program / Institution</th>
+                        <th>Degree</th>
+                        <th>Term</th>
+                        <th>Status</th>
+                        <th>GPA</th>
+                        <th>Origin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td>#{{ row.p_id }}</td>
+                        <td>{{ row.program }}</td>
+                        <td>{{ row.degree }}</td>
+                        <td>{{ row.term }}</td>
+                        <td>{{ row.status }}</td>
+                        <td>{{ "%.2f"|format(row.gpa) if row.gpa is not none else "N/A" }}</td>
+                        <td>{{ row.us_or_international }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7">No applicant rows loaded yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+        // Both buttons post JSON and reload, so the page reflects the new state.
+        // Progressive enhancement only: without JavaScript the plain form POST
+        // still reaches the same endpoint.
+        document.querySelectorAll("#pull-data-form, #update-analysis-form").forEach(function (form) {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+                fetch(form.action, { method: "POST", headers: { "Accept": "application/json" } })
+                    .then(function () { window.location.reload(); });
+            });
+        });
+    </script>
+</body>
+</html>
