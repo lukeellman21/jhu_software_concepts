@@ -7,7 +7,7 @@ Pylint score, a generated dependency graph, and CI that enforces all of it.
 
 - **Documentation:** https://lukeellman-jhu-software-concepts.readthedocs.io/en/latest/
 - **CI:** [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) runs Pylint, the dependency graph, Snyk and Pytest
-- **Evidence:** [`pylint_report.txt`](pylint_report.txt), [`dependency.svg`](dependency.svg), [`snyk-analysis.png`](snyk-analysis.png), [`coverage_summary.txt`](coverage_summary.txt)
+- **Evidence:** [`pylint_report.txt`](pylint_report.txt), [`dependency.svg`](dependency.svg), [`snyk-analysis.png`](snyk-analysis.png), [`snyk-code-analysis.png`](snyk-code-analysis.png), [`coverage_summary.txt`](coverage_summary.txt)
 - **Report:** [`module_5_report.pdf`](module_5_report.pdf)
 
 ## Layout
@@ -31,7 +31,9 @@ module_5/
 ├── .pylintrc                 # three documented deviations from the defaults
 ├── setup.py                  # installable package
 ├── dependency.svg            # pydeps + Graphviz
-├── snyk-analysis.png         # supply-chain scan evidence
+├── snyk-analysis.png         # dependency scan evidence
+├── snyk-code-analysis.png    # SAST scan evidence (extra credit)
+├── ci_success.png            # green CI run
 ├── pylint_report.txt         # 10.00/10 evidence
 ├── coverage_summary.txt
 ├── module_5_report.pdf

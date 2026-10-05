@@ -377,7 +377,8 @@ def build():
     add(para(
         "<b>Static analysis (extra credit).</b> <font face='Courier'>snyk code test</font> "
         "reported six findings, all LOW, with no HIGH or MEDIUM. One was fixed and five "
-        "were triaged as not exploitable:"))
+        "were triaged as not exploitable (see "
+        "<font face='Courier'>snyk-code-analysis.png</font>):"))
     add(table([
         ["Finding", "Location", "Disposition"],
         ["Use of Hardcoded Passwords",
