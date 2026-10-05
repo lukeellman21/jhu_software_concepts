@@ -35,7 +35,8 @@ module_5/
 ├── pylint_report.txt         # 10.00/10 evidence
 ├── coverage_summary.txt
 ├── module_5_report.pdf
-├── requirements.txt
+├── requirements.txt          # abstract dependencies
+├── requirements.lock         # resolved pins for `uv pip sync`
 └── pytest.ini
 ```
 
@@ -58,18 +59,24 @@ pip install -e .                 # installable package, see setup.py
 
 ### Option B: uv
 
-`uv pip sync` makes the environment match `requirements.txt` exactly, dropping
-anything not listed, which is what makes it reproducible rather than merely
-installable.
+`uv pip sync` makes the environment *match* the file exactly, removing anything
+not listed. That is what makes it reproducible rather than merely installable,
+but it also means it needs a **fully resolved lockfile**, not the abstract
+`requirements.txt`: `sync` installs exactly what is listed and does not resolve
+transitive dependencies. `requirements.lock` is that resolved file, regenerated
+with `uv pip compile requirements.txt -o requirements.lock`.
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh    # if uv is not installed
 cd jhu_software_concepts/module_5
 uv venv
 source .venv/bin/activate
-uv pip sync requirements.txt
+uv pip sync requirements.lock      # exact, reproducible
 uv pip install -e .
 ```
+
+To resolve from the abstract file instead, use `uv pip install -r
+requirements.txt`, which behaves like pip and pulls transitive dependencies.
 
 Either way, verify:
 

@@ -96,15 +96,21 @@ def build():
     add(code("cd module_5\n"
              "uv venv\n"
              "source .venv/bin/activate\n"
-             "uv pip sync requirements.txt\n"
+             "uv pip sync requirements.lock\n"
              "uv pip install -e ."))
     add(para(
-        "The two are not equivalent. <font face='Courier'>pip install -r</font> adds "
-        "what is listed and leaves anything else in place; <font face='Courier'>uv pip "
-        "sync</font> makes the environment <i>match</i> the file, removing packages "
-        "that are not in it. That difference is what turns a list of dependencies into "
-        "a reproducible environment, which is why uv is the better choice for CI and "
-        "for reproducing a colleague's setup."))
+        "The two are not equivalent, and the difference matters in practice. "
+        "<font face='Courier'>pip install -r</font> adds what is listed, resolves "
+        "transitive dependencies, and leaves anything already present in place. "
+        "<font face='Courier'>uv pip sync</font> makes the environment <i>match</i> the "
+        "file, removing packages that are not in it &mdash; but because it installs "
+        "exactly what is listed, it needs a fully resolved lockfile rather than the "
+        "abstract <font face='Courier'>requirements.txt</font>. Pointing it at the "
+        "abstract file produces a subtly broken environment: pytest installs without "
+        "pluggy and fails on import. <font face='Courier'>requirements.lock</font> is "
+        "the resolved file, generated with <font face='Courier'>uv pip compile "
+        "requirements.txt -o requirements.lock</font>, and both install paths were "
+        "verified from an empty virtual environment with the full test suite."))
     add(para(
         "<font face='Courier'>requirements.txt</font> carries the runtime dependencies "
         "(Flask, psycopg, SQLAlchemy, BeautifulSoup, Selenium), the test tooling "
