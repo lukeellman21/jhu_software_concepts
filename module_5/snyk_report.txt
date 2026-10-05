@@ -1,0 +1,73 @@
+$ snyk test --file=requirements.txt --package-manager=pip
+
+
+Testing  (requirements.txt) ...
+                                                                     
+✔ Tested 59 dependencies for known issues, no vulnerable paths found.
+                                                                     
+╭──────────────────────────────────────────────────────────────────────────╮
+│ Test Summary                                                             │
+│                                                                          │
+│   Organization:      lukeellman21                                        │
+│   Test type:         open-source                                         │
+│   Project path:      /Users/lukeellman/jhu_software_concepts/module_5    │
+│                                                                          │
+│   Total issues: 0                                                        │
+╰──────────────────────────────────────────────────────────────────────────╯
+💡 Tip
+
+   To view ignored issues, use the --include-ignores option.
+                                                            
+
+
+$ snyk code test
+
+
+Testing /Users/lukeellman/jhu_software_concepts/module_5 ...
+
+Open Issues
+
+ ✗ [LOW] Path Traversal
+   Finding ID: 6589f7ec-194f-4669-a5ab-416cf86eac26
+   Path: src/clean.py, line 115
+   Info: Unsanitized input from a command line argument flows into open, where it is used as a path. This may result in a Path Traversal vulnerability and allow an attacker to read arbitrary files.
+
+ ✗ [LOW] Path Traversal
+   Finding ID: c87a98c4-e1fb-4cee-85f9-f7c62ff190f4
+   Path: src/scrape.py, line 228
+   Info: Unsanitized input from a command line argument flows into open, where it is used as a path. This may result in a Path Traversal vulnerability and allow an attacker to read arbitrary files.
+
+ ✗ [LOW] Path Traversal
+   Finding ID: 9ccceb22-d4e0-45ec-82df-25737b71a07d
+   Path: src/clean.py, line 120
+   Info: Unsanitized input from a command line argument flows into json.dump, where it is used as a path. This may result in a Path Traversal vulnerability and allow an attacker to write arbitrary files.
+
+ ✗ [LOW] Path Traversal
+   Finding ID: ec6df094-2224-4223-998f-ffee2538e866
+   Path: src/scrape.py, line 222
+   Info: Unsanitized input from a command line argument flows into json.dump, where it is used as a path. This may result in a Path Traversal vulnerability and allow an attacker to write arbitrary files.
+
+ ✗ [LOW] Path Traversal
+   Finding ID: 4516475e-e2db-40de-9abf-a6db05974971
+   Path: src/load_data.py, line 370
+   Info: Unsanitized input from an environment variable flows into open, where it is used as a path. This may result in a Path Traversal vulnerability and allow an attacker to read arbitrary files.
+
+
+
+╭──────────────────────────────────────────────────────────────────────────╮
+│ Test Summary                                                             │
+│                                                                          │
+│   Organization:      lukeellman21                                        │
+│   Test type:         Static code analysis                                │
+│   Project path:      /Users/lukeellman/jhu_software_concepts/module_5    │
+│                                                                          │
+│   Total issues:   5                                                      │
+│   Ignored issues: 0 [ 0 HIGH  0 MEDIUM  0 LOW ]                          │
+│   Open issues:    5 [ 0 HIGH  0 MEDIUM  5 LOW ]                          │
+╰──────────────────────────────────────────────────────────────────────────╯
+    
+💡 Tip
+
+   To view ignored issues, use the --include-ignores option.
+                                                            
+

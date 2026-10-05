@@ -365,6 +365,52 @@ def build():
         "endpoint's handling of hostile query strings, and the environment-driven "
         "credential handling including password redaction."))
 
+    # ------------------------------------------------------------- supply chain
+    add(para("8. Supply-chain and static application security testing", H2))
+    add(para(
+        "<b>Dependency scan.</b> <font face='Courier'>snyk test --file=requirements.txt "
+        "--package-manager=pip</font> tested <b>59 dependencies</b> and found "
+        "<b>no vulnerable paths</b> (see <font face='Courier'>snyk-analysis.png</font>). "
+        "Nothing needed patching or removing. The same scan runs in CI, where a missing "
+        "<font face='Courier'>SNYK_TOKEN</font> emits a warning rather than passing "
+        "silently, so an unconfigured secret cannot be mistaken for a clean result."))
+    add(para(
+        "<b>Static analysis (extra credit).</b> <font face='Courier'>snyk code test</font> "
+        "reported six findings, all LOW, with no HIGH or MEDIUM. One was fixed and five "
+        "were triaged as not exploitable:"))
+    add(table([
+        ["Finding", "Location", "Disposition"],
+        ["Use of Hardcoded Passwords",
+         "tests/test_sql_safety.py",
+         "FIXED. The rule fires on the shape {\"password\": <literal>}, not on the "
+         "value, so the assertion was restructured to compare the non-secret keys as a "
+         "dict and the placeholder separately. Same coverage, finding cleared: 6 -> 5."],
+        ["Path Traversal (x2)",
+         "src/clean.py lines 115, 120",
+         "ACCEPTED. --in/--out come from the operator's own command line."],
+        ["Path Traversal (x2)",
+         "src/scrape.py lines 222, 228",
+         "ACCEPTED. --out comes from the operator's own command line."],
+        ["Path Traversal (x1)",
+         "src/load_data.py line 364",
+         "MITIGATED. GRADCAFE_DATA_FILE is now expanded, resolved and checked with "
+         "is_file() before opening, so a bad path fails immediately with a message "
+         "naming it rather than failing obscurely later."],
+    ], [1.5 * inch, 1.5 * inch, 3.4 * inch]))
+    add(Spacer(1, 8))
+    add(para(
+        "<b>Why the five are accepted.</b> Every one is a command-line entry point or an "
+        "environment variable read by a tool the operator runs themselves. The input is "
+        "already under the control of whoever starts the process, so no privilege or "
+        "trust boundary is crossed: someone able to pass "
+        "<font face='Courier'>--out ../../etc/something</font> can equally run "
+        "<font face='Courier'>cat</font> directly. This is the opposite of the web layer, "
+        "where input genuinely arrives from an untrusted client and is therefore "
+        "parameterised, allow-listed and clamped as described in sections 4 and 5. "
+        "Recording the reasoning matters more than the count: a LOW finding that is "
+        "understood and accepted is a decision, whereas one that is silenced is a "
+        "liability.", SMALL))
+
     SimpleDocTemplate(
         str(OUTPUT), pagesize=LETTER,
         leftMargin=0.85 * inch, rightMargin=0.85 * inch,

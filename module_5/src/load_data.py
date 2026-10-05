@@ -24,6 +24,7 @@ import os
 import re
 import sys
 from datetime import date, datetime
+from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 import psycopg
@@ -360,8 +361,13 @@ def read_records(path: Optional[str] = None) -> List[Dict[str, Any]]:
     :param path: file to read; defaults to :data:`DEFAULT_DATA_FILE` (or the
         ``GRADCAFE_DATA_FILE`` environment variable when set).
     """
-    file_path = path or os.environ.get("GRADCAFE_DATA_FILE") or DEFAULT_DATA_FILE
-    with open(file_path, "r", encoding="utf-8") as handle:
+    file_path = Path(path or os.environ.get("GRADCAFE_DATA_FILE") or DEFAULT_DATA_FILE)
+    resolved = file_path.expanduser().resolve()
+    if not resolved.is_file():
+        raise FileNotFoundError(
+            f"Dataset not found: {resolved}. Set GRADCAFE_DATA_FILE or pass --file."
+        )
+    with open(resolved, "r", encoding="utf-8") as handle:
         return json.load(handle)
 
 

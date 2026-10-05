@@ -278,3 +278,12 @@ def test_smith_college_is_not_counted_as_mit(conn):
 
     assert analysis["fall_2026_phd_cs_acceptances"] == 1
     assert analysis["llm_fall_2026_phd_cs_acceptances"] == 1
+
+
+def test_read_records_rejects_a_missing_dataset(monkeypatch, tmp_path):
+    """A bad GRADCAFE_DATA_FILE fails early with a message naming the path."""
+    missing = tmp_path / "not-here.json"
+    monkeypatch.setenv("GRADCAFE_DATA_FILE", str(missing))
+
+    with pytest.raises(FileNotFoundError, match="Dataset not found"):
+        load_data.read_records()

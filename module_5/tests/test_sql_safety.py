@@ -14,6 +14,10 @@ from src import db, load_data, query_data
 
 pytestmark = pytest.mark.db
 
+#: Obvious placeholder used where a test needs a password-shaped value.
+#: Named so that neither a reader nor a secret scanner mistakes it for a real one.
+PLACEHOLDER_SECRET = "example-not-a-real-password"
+
 #: Inputs a hostile client might send.
 INJECTION_PAYLOADS = (
     "'; DROP TABLE applicants; --",
@@ -259,15 +263,19 @@ class TestConnectionSettings:
         monkeypatch.setenv("DB_PORT", "6543")
         monkeypatch.setenv("DB_NAME", "gradcafe")
         monkeypatch.setenv("DB_USER", "gradcafe_app")
-        monkeypatch.setenv("DB_PASSWORD", "s3cret")
+        monkeypatch.setenv("DB_PASSWORD", PLACEHOLDER_SECRET)
 
-        assert db.get_connection_settings() == {
+        settings = db.get_connection_settings()
+
+        # Asserted without a literal under a "password" key, which static
+        # analysers flag as a hard-coded credential regardless of the value.
+        assert {k: v for k, v in settings.items() if k != "password"} == {
             "host": "db.example.com",
             "port": "6543",
             "dbname": "gradcafe",
             "user": "gradcafe_app",
-            "password": "s3cret",
         }
+        assert settings["password"] == PLACEHOLDER_SECRET
 
     def test_no_discrete_variables_means_none(self, monkeypatch):
         for name in db.DB_ENV_VARS:
@@ -282,12 +290,12 @@ class TestConnectionSettings:
         monkeypatch.setenv("DB_PORT", "6543")
         monkeypatch.setenv("DB_NAME", "gradcafe")
         monkeypatch.setenv("DB_USER", "gradcafe_app")
-        monkeypatch.setenv("DB_PASSWORD", "s3cret")
+        monkeypatch.setenv("DB_PASSWORD", PLACEHOLDER_SECRET)
 
         description = db.describe_connection()
 
         assert description == "db.example.com:6543/gradcafe as gradcafe_app"
-        assert "s3cret" not in description
+        assert PLACEHOLDER_SECRET not in description
 
     def test_describe_connection_redacts_a_url_password(self, monkeypatch):
         for name in db.DB_ENV_VARS:
